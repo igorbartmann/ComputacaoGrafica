@@ -21,7 +21,11 @@ const GLuint WIDTH = 1000, HEIGHT = 1000;
 const char* WINDOW_TITLE = "M2_Cubes - Igor Bartmann";
 
 // Variáveis auxiliares.
-bool rotateX = false, rotateY = false, rotateZ = false;
+bool rotateTop = false, rotateBottom = false, rotateLeft = false, rotateRight = false, rotateTopRight = false, rotateBottomLeft = false, zoonIn = false, zoonOut = false;
+float zoonValue = 0;
+
+// Enumerador para ordenação dos quadrados
+enum Order { First = 1, Second = 2 } squareOrder;
 
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -36,19 +40,71 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
-		case GLFW_KEY_X:
-			rotateX = true;
-			rotateY = false;
-			rotateZ = false;
+		case GLFW_KEY_W:
+			rotateTop = true;
+			rotateBottom = false;
+			rotateLeft = false;
+			rotateRight = false;
+			rotateTopRight = false;
+			rotateBottomLeft = false;
 			break;
-		case GLFW_KEY_Y:
-			rotateX = false;
-			rotateY = true;
-			rotateZ = false;
+		case GLFW_KEY_S:
+			rotateTop = false;
+			rotateBottom = true;
+			rotateLeft = false;
+			rotateRight = false;
+			rotateTopRight = false;
+			rotateBottomLeft = false;
+			break;
+		case GLFW_KEY_A:
+			rotateTop = false;
+			rotateBottom = false;
+			rotateLeft = true;
+			rotateRight = false;
+			rotateTopRight = false;
+			rotateBottomLeft = false;
+			break;
+		case GLFW_KEY_D:
+			rotateTop = false;
+			rotateBottom = false;
+			rotateLeft = false;
+			rotateRight = true;
+			rotateTopRight = false;
+			rotateBottomLeft = false;
+			break;
+		case GLFW_KEY_X:
+			rotateTop = false;
+			rotateBottom = false;
+			rotateLeft = false;
+			rotateRight = false;
+			rotateTopRight = true;
+			rotateBottomLeft = false;
+			break;
 		case GLFW_KEY_Z:
-			rotateX = false;
-			rotateY = false;
-			rotateZ = true;
+			rotateTop = false;
+			rotateBottom = false;
+			rotateLeft = false;
+			rotateRight = false;
+			rotateTopRight = false;
+			rotateBottomLeft = true;
+			break;
+		case GLFW_KEY_L:
+			zoonIn = true;
+			zoonOut = false;
+			break;
+		case GLFW_KEY_K:
+			zoonIn = false;
+			zoonOut = true;
+			break;
+		case GLFW_KEY_SPACE:
+			rotateTop = false;
+			rotateBottom = false;
+			rotateLeft = false;
+			rotateRight = false;
+			rotateTopRight = false;
+			rotateBottomLeft = false;
+			zoonIn = false;
+			zoonOut = false;
 			break;
 	}
 }
@@ -127,35 +183,66 @@ int setupProgramShader()
 	return shaderProgram;
 }
 
+
 // Função para configurar as coordenadas e buffers.
 int setupGeometry()
 {
 	// Coordenadas (x, y, z, r, g, b).
 	GLfloat vertices[] = 
 	{
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		-0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		0.5,  -0.5, -0.5, 1.0, 0.0, 1.0,
+		// Quadrado 1 (frente)
+		-0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
+		-0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
+		0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
 
-		-0.5, -0.5, 0.5,  1.0, 1.0, 0.0,
-		0.5,  -0.5, 0.5,  0.0, 1.0, 1.0,
-		0.5,  -0.5, -0.5, 1.0, 0.0, 1.0,
+		-0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
+		0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, 0.0, 1.0,
 
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		0.0,  0.5,  0.0,  1.0, 1.0, 0.0,
-		0.5,  -0.5, -0.5, 1.0, 1.0, 0.0,
+		// Quadrado 2 (tras)
+		-0.5, 0.5, 0.5, 1.0, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
+		0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
 
-		-0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		0.0,  0.5,  0.0,  1.0, 0.0, 1.0,
-		-0.5, -0.5, 0.5,  1.0, 0.0, 1.0,
+		-0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
+		0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
+		0.5, -0.5, 0.5, 0.0, 1.0, 1.0,
 
-		-0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		0.5,  -0.5, 0.5, 1.0, 1.0, 0.0,
+		// Quadrado 3 (cima)
+		-0.5, 0.5, -0.5, 0.0, 0.0, 0.0,
+		-0.5, 0.5, 0.5, 0.0, 0.0, 0.0,
+		0.5, 0.5, -0.5, 0.0, 0.0, 0.0,
 
-		0.5, -0.5, 0.5,  0.0, 1.0, 1.0,
-		0.0, 0.5,  0.0,  0.0, 1.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+		-0.5, 0.5, 0.5, 0.4, 1.0, 0.5,
+		0.5, 0.5, -0.5, 0.4, 1.0, 0.5,
+		0.5, 0.5, 0.5, 0.4, 1.0, 0.5,
+
+		// Quadrado 4 (baixo)
+		0.5, -0.5, -0.5, 0.3, 0.3, 0.3,
+		0.5, -0.5, 0.5, 0.3, 0.3, 0.3,
+		-0.5, -0.5, -0.5, 0.3, 0.3, 0.3,
+
+		0.5, -0.5, 0.5, 0.4, 0.3, 0.7,
+		-0.5, -0.5, -0.5, 0.4, 0.3, 0.7,
+		-0.5, -0.5, 0.5, 0.4, 0.3, 0.7,
+
+		// Quadrado 5 (esquerda)
+		-0.5, 0.5, -0.5, 0.2, 0.7, 0.4,
+		-0.5, -0.5, -0.5, 0.2, 0.7, 0.4,
+		- 0.5, -0.5, 0.5, 0.2, 0.7, 0.4,
+
+		-0.5, 0.5, -0.5, 1.0, 0.2, 0.7,
+		-0.5, 0.5, 0.5, 1.0, 0.2, 0.7,
+		-0.5, -0.5, 0.5, 1.0, 0.2, 0.7,
+
+		// Quadrado 6 (direita)
+		0.5, 0.5, -0.5, 0.4, 0.5, 0.4,
+		0.5, -0.5, -0.5, 0.4, 0.5, 0.4,
+		0.5, -0.5, 0.5, 0.4, 0.5, 0.4,
+
+		0.5, 0.5, -0.5, 1.0, 0.4, 0.3,
+		0.5, 0.5, 0.5, 1.0, 0.4, 0.3,
+		0.5, -0.5, 0.5, 1.0, 0.4, 0.3
 	};
 
 	// Criar VBO.
@@ -185,6 +272,76 @@ int setupGeometry()
 
 	// Retornar VAO criado.
 	return VAO;
+}
+
+glm::mat4 applyEffects(glm::mat4 matrix, Order order)
+{
+	// Transladar.
+	if (order == First)
+	{
+		matrix = glm::translate(matrix, glm::vec3(-0.4f, -0.4f, 0.0f));
+	}
+	else if (order == Second)
+	{
+		matrix = glm::translate(matrix, glm::vec3(0.4f, 0.4f, 0.0f));
+	}
+
+	// Escala.
+	if (zoonIn)
+	{
+		zoonIn = false;
+		zoonValue = zoonValue >= 0.2f ? zoonValue : zoonValue + 0.2f;
+	}
+	else if (zoonOut)
+	{
+		zoonOut = false;
+		zoonValue = zoonValue <= -0.7f ? zoonValue : zoonValue - 0.2f;
+	}
+	matrix = glm::scale(matrix, glm::vec3((matrix[0][0] + zoonValue) / 2, (matrix[1][1] + zoonValue) / 2, (matrix[2][2] + zoonValue) / 2));
+
+	// Rotação.
+	float angle = (GLfloat)glfwGetTime();
+	if (rotateTop)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(0.5f, 0.0f, 0.0f));
+	}
+	else if (rotateBottom)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(-0.5f, 0.0f, 0.0f));
+	}
+	else if (rotateLeft)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(0.0f, 0.5f, 0.0f));
+	}
+	else if (rotateRight)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(0.0f, -0.5f, 0.0f));
+	}
+	else if (rotateTopRight)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(0.5f, -0.5f, 0.5f));
+	}
+	else if (rotateBottomLeft)
+	{
+		matrix = glm::rotate(matrix, angle, glm::vec3(-0.5f, 0.5f, -0.5f));
+	}
+
+	return matrix;
+}
+
+void generateSquare(int shaderId, Order order)
+{
+	// Cria matriz identidade do primeiro quadrado.
+	glm::mat4 model = glm::mat4(1);
+
+	// Aplica efeitos.
+	model = applyEffects(model, order);
+
+	// Passar a matriz identidade para a entrada (uniform) do vertex shader.
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "model"), 1, FALSE, glm::value_ptr(model));
+
+	// Chamar função de desenho.
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 int main()
@@ -232,21 +389,13 @@ int main()
 	// Vinculação do program shader.
 	glUseProgram(shaderID);
 
-	// Criar matriz identidade.
-	glm::mat4 model = glm::mat4(1);
-	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	// Passar matriz identidade para a entrada (uniform) do vertex shader.
-	GLint modelLoc = glGetUniformLocation(shaderID, "model");
-	glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
-
 	// Habilita teste de profundidade.
 	glEnable(GL_DEPTH_TEST);
 
 	// Laço principal da execução.
 	while (!glfwWindowShouldClose(window))
 	{
-		// Chacar e tratar eventos de input.
+		// Checar e tratar eventos de input.
 		glfwPollEvents();
 
 		// Limpar o buffer de cor.
@@ -256,34 +405,12 @@ int main()
 		glLineWidth(10);
 		glPointSize(20);
 
-		model = glm::mat4(1);
-		float angle = (GLfloat)glfwGetTime();
-		if (rotateX)
-		{
-			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-		else if (rotateY)
-		{
-			model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
-		}
-		else if (rotateZ)
-		{
-			model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-
-		// Passar matriz identidade para a entrada (uniform) do vertex shader.
-		glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
-
-		// Bin
-		// Chamada de desenho - drawcall
-		// Poligono Preenchido - GL_TRIANGLES
-
 		// Vincular VAO.
 		glBindVertexArray(VAO);
 
-		// Chamar função de desenho.
-		glDrawArrays(GL_TRIANGLES, 0, 18);
-		glDrawArrays(GL_POINTS, 0, 18);
+		// Gera e imprime os quadrados.
+		generateSquare(shaderID, First);
+		generateSquare(shaderID, Second);
 		
 		// Desvincular VAO.
 		glBindVertexArray(0);
