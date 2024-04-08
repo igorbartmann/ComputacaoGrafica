@@ -1,6 +1,7 @@
 // Default libs C++.
 #include <iostream>
 #include <string>
+#include <vector>
 #include <assert.h>
 
 // GLAD.
@@ -14,18 +15,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// SHADER.
+#include "Shader.h"
+
+// MESH.
+#include "Mesh.h"
+
+// STB_IMAGE.
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h";
+
 using namespace std;
 
 // Definições da janela.
 const GLuint WIDTH = 1000, HEIGHT = 1000;
-const char* WINDOW_TITLE = "M2_Cubes - Igor Bartmann";
+const char* WINDOW_TITLE = "M3_OBJ - Igor Bartmann";
 
 // Variáveis auxiliares.
-bool rotateTop = false, rotateBottom = false, rotateLeft = false, rotateRight = false, rotateTopRight = false, rotateBottomLeft = false, zoonIn = false, zoonOut = false;
-float zoonValue = 0;
-
-// Enumerador para ordenação dos quadrados
-enum Order { First = 1, Second = 2 } squareOrder;
+bool rotateX = false, rotateY = false, rotateZ = false, zoomIn = false, zoomOut = false;
+float zoomValue = 0;
 
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -35,313 +43,231 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		return;
 	}
 
-	switch (key)
+	if (key == GLFW_KEY_ESCAPE)
 	{
-		case GLFW_KEY_ESCAPE:
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			break;
-		case GLFW_KEY_W:
-			rotateTop = true;
-			rotateBottom = false;
-			rotateLeft = false;
-			rotateRight = false;
-			rotateTopRight = false;
-			rotateBottomLeft = false;
-			break;
-		case GLFW_KEY_S:
-			rotateTop = false;
-			rotateBottom = true;
-			rotateLeft = false;
-			rotateRight = false;
-			rotateTopRight = false;
-			rotateBottomLeft = false;
-			break;
-		case GLFW_KEY_A:
-			rotateTop = false;
-			rotateBottom = false;
-			rotateLeft = true;
-			rotateRight = false;
-			rotateTopRight = false;
-			rotateBottomLeft = false;
-			break;
-		case GLFW_KEY_D:
-			rotateTop = false;
-			rotateBottom = false;
-			rotateLeft = false;
-			rotateRight = true;
-			rotateTopRight = false;
-			rotateBottomLeft = false;
-			break;
-		case GLFW_KEY_X:
-			rotateTop = false;
-			rotateBottom = false;
-			rotateLeft = false;
-			rotateRight = false;
-			rotateTopRight = true;
-			rotateBottomLeft = false;
-			break;
-		case GLFW_KEY_Z:
-			rotateTop = false;
-			rotateBottom = false;
-			rotateLeft = false;
-			rotateRight = false;
-			rotateTopRight = false;
-			rotateBottomLeft = true;
-			break;
-		case GLFW_KEY_L:
-			zoonIn = true;
-			zoonOut = false;
-			break;
-		case GLFW_KEY_K:
-			zoonIn = false;
-			zoonOut = true;
-			break;
-		case GLFW_KEY_SPACE:
-			rotateTop = false;
-			rotateBottom = false;
-			rotateLeft = false;
-			rotateRight = false;
-			rotateTopRight = false;
-			rotateBottomLeft = false;
-			zoonIn = false;
-			zoonOut = false;
-			break;
-	}
-}
-
-// Função para configurar os shaders.
-int setupProgramShader()
-{
-	// Codigo-Fonte do Vertex Shader e Fragment Shader (em GLSL).
-	const GLchar* vertexShaderSource =
-		"#version 450\n"
-		"layout (location = 0) in vec3 position;\n"
-		"layout (location = 1) in vec3 color;\n"
-		"uniform mat4 model;\n"
-		"out vec4 finalColor;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = model * vec4(position, 1.0);\n"
-		"   finalColor = vec4(color, 1.0);\n"
-		"}\0";
-
-	const GLchar* fragmentShaderSource =
-		"#version 450\n"
-		"in vec4 finalColor;\n"
-		"out vec4 color;\n"
-		"void main()\n"
-		"{\n"
-		"   color = finalColor;\n"
-		"}\n\0";
-
-	// Criar Vertex Shader.
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	// Chegar erros de compilação.
-	GLint success;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		GLchar infoLog[512];
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
-	// Criar Fragment Shader.
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	// Checar erros de compilação.
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
+	// Rotação.
+	if (key == GLFW_KEY_X)
 	{
-		GLchar infoLog[512];
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+		rotateX = true;
+		rotateY = false;
+		rotateZ = false;
 	}
-
-	// Vinculando Vertex Shader e Fragment Shader ao Program Shader.
-	GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	// Chacar erros de vinculação.
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		GLchar infoLog[512];
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+	if (key == GLFW_KEY_Y)
+	{
+		rotateX = false;
+		rotateY = true;
+		rotateZ = false;
 	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shaderProgram;
-}
-
-
-// Função para configurar as coordenadas e buffers.
-int setupGeometry()
-{
-	// Coordenadas (x, y, z, r, g, b).
-	GLfloat vertices[] = 
+	if (key == GLFW_KEY_Z)
 	{
-		// Quadrado 1 (frente)
-		-0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-		-0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-		0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-
-		-0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
-		0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 0.0, 1.0,
-
-		// Quadrado 2 (tras)
-		-0.5, 0.5, 0.5, 1.0, 0.0, 1.0,
-		-0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
-		0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
-
-		-0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
-		0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
-		0.5, -0.5, 0.5, 0.0, 1.0, 1.0,
-
-		// Quadrado 3 (cima)
-		-0.5, 0.5, -0.5, 0.0, 0.0, 0.0,
-		-0.5, 0.5, 0.5, 0.0, 0.0, 0.0,
-		0.5, 0.5, -0.5, 0.0, 0.0, 0.0,
-
-		-0.5, 0.5, 0.5, 0.4, 1.0, 0.5,
-		0.5, 0.5, -0.5, 0.4, 1.0, 0.5,
-		0.5, 0.5, 0.5, 0.4, 1.0, 0.5,
-
-		// Quadrado 4 (baixo)
-		0.5, -0.5, -0.5, 0.3, 0.3, 0.3,
-		0.5, -0.5, 0.5, 0.3, 0.3, 0.3,
-		-0.5, -0.5, -0.5, 0.3, 0.3, 0.3,
-
-		0.5, -0.5, 0.5, 0.4, 0.3, 0.7,
-		-0.5, -0.5, -0.5, 0.4, 0.3, 0.7,
-		-0.5, -0.5, 0.5, 0.4, 0.3, 0.7,
-
-		// Quadrado 5 (esquerda)
-		-0.5, 0.5, -0.5, 0.2, 0.7, 0.4,
-		-0.5, -0.5, -0.5, 0.2, 0.7, 0.4,
-		- 0.5, -0.5, 0.5, 0.2, 0.7, 0.4,
-
-		-0.5, 0.5, -0.5, 1.0, 0.2, 0.7,
-		-0.5, 0.5, 0.5, 1.0, 0.2, 0.7,
-		-0.5, -0.5, 0.5, 1.0, 0.2, 0.7,
-
-		// Quadrado 6 (direita)
-		0.5, 0.5, -0.5, 0.4, 0.5, 0.4,
-		0.5, -0.5, -0.5, 0.4, 0.5, 0.4,
-		0.5, -0.5, 0.5, 0.4, 0.5, 0.4,
-
-		0.5, 0.5, -0.5, 1.0, 0.4, 0.3,
-		0.5, 0.5, 0.5, 1.0, 0.4, 0.3,
-		0.5, -0.5, 0.5, 1.0, 0.4, 0.3
-	};
-
-	// Criar VBO.
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// Criar VAO.
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	// Configurar atributo de posição (x, y, z).
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-
-	// Configurar atributo de cor (r, g, b).
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	// Desvincular VBO atualmente vinculado.
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Desvincular VAO atualmente vinculado.
-	glBindVertexArray(0);
-
-	// Retornar VAO criado.
-	return VAO;
-}
-
-glm::mat4 applyEffects(glm::mat4 matrix, Order order)
-{
-	// Transladar.
-	if (order == First)
-	{
-		matrix = glm::translate(matrix, glm::vec3(-0.4f, -0.4f, 0.0f));
+		rotateX = false;
+		rotateY = false;
+		rotateZ = true;
 	}
-	else if (order == Second)
+	if (key == GLFW_KEY_SPACE)
 	{
-		matrix = glm::translate(matrix, glm::vec3(0.4f, 0.4f, 0.0f));
+		rotateX = false;
+		rotateY = false;
+		rotateZ = false;
 	}
 
 	// Escala.
-	if (zoonIn)
+	if (key == GLFW_KEY_I)
 	{
-		zoonIn = false;
-		zoonValue = zoonValue >= 0.2f ? zoonValue : zoonValue + 0.2f;
+		zoomIn = true;
+		zoomOut = false;
 	}
-	else if (zoonOut)
+	if (key == GLFW_KEY_O)
 	{
-		zoonOut = false;
-		zoonValue = zoonValue <= -0.7f ? zoonValue : zoonValue - 0.2f;
+		zoomIn = false;
+		zoomOut = true;
 	}
-	matrix = glm::scale(matrix, glm::vec3((matrix[0][0] + zoonValue) / 2, (matrix[1][1] + zoonValue) / 2, (matrix[2][2] + zoonValue) / 2));
-
-	// Rotação.
-	float angle = (GLfloat)glfwGetTime();
-	if (rotateTop)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(0.5f, 0.0f, 0.0f));
-	}
-	else if (rotateBottom)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(-0.5f, 0.0f, 0.0f));
-	}
-	else if (rotateLeft)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(0.0f, 0.5f, 0.0f));
-	}
-	else if (rotateRight)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(0.0f, -0.5f, 0.0f));
-	}
-	else if (rotateTopRight)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(0.5f, -0.5f, 0.5f));
-	}
-	else if (rotateBottomLeft)
-	{
-		matrix = glm::rotate(matrix, angle, glm::vec3(-0.5f, 0.5f, -0.5f));
-	}
-
-	return matrix;
 }
 
-void generateSquare(int shaderId, Order order)
+int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
 {
-	// Cria matriz identidade do primeiro quadrado.
-	glm::mat4 model = glm::mat4(1);
+	vector <glm::vec3> vertices;
+	vector <GLuint> indices;
+	vector <glm::vec2> texCoords;
+	vector <glm::vec3> normals;
+	vector <GLfloat> vbuffer;
 
-	// Aplica efeitos.
-	model = applyEffects(model, order);
+	ifstream inputFile;
+	inputFile.open(filepath.c_str());
+	if (inputFile.is_open())
+	{
+		char line[100];
+		string sline;
 
-	// Passar a matriz identidade para a entrada (uniform) do vertex shader.
-	glUniformMatrix4fv(glGetUniformLocation(shaderId, "model"), 1, FALSE, glm::value_ptr(model));
+		while (!inputFile.eof())
+		{
+			inputFile.getline(line, 100);
+			sline = line;
 
-	// Chamar função de desenho.
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+			string word;
+			istringstream ssline(line);
+			ssline >> word;
+
+			if (word == "v")
+			{
+				glm::vec3 v;
+				ssline >> v.x >> v.y >> v.z;
+
+				vertices.push_back(v);
+			}
+			if (word == "vt")
+			{
+				glm::vec2 vt;
+				ssline >> vt.s >> vt.t;
+
+				texCoords.push_back(vt);
+			}
+			if (word == "vn")
+			{
+				glm::vec3 vn;
+				ssline >> vn.x >> vn.y >> vn.z;
+
+				normals.push_back(vn);
+			}
+			if (word == "f")
+			{
+				string tokens[3];
+				ssline >> tokens[0] >> tokens[1] >> tokens[2];
+
+				for (int i = 0; i < 3; i++)
+				{
+					//Recuperando os indices de v
+					int pos = tokens[i].find("/");
+					string token = tokens[i].substr(0, pos);
+					int index = atoi(token.c_str()) - 1;
+					indices.push_back(index);
+
+					vbuffer.push_back(vertices[index].x);
+					vbuffer.push_back(vertices[index].y);
+					vbuffer.push_back(vertices[index].z);
+					vbuffer.push_back(color.r);
+					vbuffer.push_back(color.g);
+					vbuffer.push_back(color.b);
+
+					//Recuperando os indices de vts
+					tokens[i] = tokens[i].substr(pos + 1);
+					pos = tokens[i].find("/");
+					token = tokens[i].substr(0, pos);
+					index = atoi(token.c_str()) - 1;
+
+					vbuffer.push_back(texCoords[index].s);
+					vbuffer.push_back(texCoords[index].t);
+
+					//Recuperando os indices de vns
+					tokens[i] = tokens[i].substr(pos + 1);
+					index = atoi(tokens[i].c_str()) - 1;
+
+					vbuffer.push_back(normals[index].x);
+					vbuffer.push_back(normals[index].y);
+					vbuffer.push_back(normals[index].z);
+				}
+			}
+		}
+	}
+	else
+	{
+		cout << "Problema ao encontrar o arquivo " << filepath << endl;
+	}
+
+	inputFile.close();
+
+	GLuint VBO, VAO;
+
+	nVerts = vbuffer.size() / 11;
+
+	//Geração do identificador do VBO
+	glGenBuffers(1, &VBO);
+
+	//Faz a conexão (vincula) do buffer como um buffer de array
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	//Envia os dados do array de floats para o buffer da OpenGl
+	glBufferData(GL_ARRAY_BUFFER, vbuffer.size() * sizeof(GLfloat), vbuffer.data(), GL_STATIC_DRAW);
+
+	//Geração do identificador do VAO (Vertex Array Object)
+	glGenVertexArrays(1, &VAO);
+
+	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
+	// e os ponteiros para os atributos 
+	glBindVertexArray(VAO);
+
+	//Atributo posição (x, y, z)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	//Atributo cor (r, g, b)
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	//Atributo coordenada de textura (s, t)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+
+	//Atributo normal do vértice (x, y, z)
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(3);
+
+	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice 
+	// atualmente vinculado - para que depois possamos desvincular com segurança.
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
+	glBindVertexArray(0);
+
+	return VAO;
+}
+
+GLuint loadTexture(string filePath)
+{
+	GLuint texId;
+
+	// Gera a textura em memória.
+	glGenTextures(1, &texId);
+	glBindTexture(GL_TEXTURE_2D, texId);
+
+	// Configura os parâmetros.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Carrega a imagem da textura.
+	int width, height, nrChanels;
+	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChanels, 0);
+	if (data)
+	{
+		if (nrChanels == 3) // jpg
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+		else //png
+		{ 
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	// Limpa o espaço armazenado.
+	stbi_image_free(data);
+
+	// Desvincula a textura.
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texId;
 }
 
 int main()
@@ -381,13 +307,20 @@ int main()
 	glViewport(0, 0, current_width, current_height);
 
 	// Obter a configuração do Program Shader.
-	GLuint shaderID = setupProgramShader();
+	Shader shader("../shaders_archives/Shader.vs", "../shaders_archives/Shader.fs");
 
-	// Obter a configuração geométrica.
-	GLuint VAO = setupGeometry();
+	// Carregar a textura.
+	GLuint texID = loadTexture("../cube_model/cube.png");
+
+	// Carregar a geometrica armazenada.
+	int nVerts;
+	GLuint VAO = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(0, 0, 0));
 
 	// Vinculação do program shader.
-	glUseProgram(shaderID);
+	glUseProgram(shader.ID);
+
+	// Associando o buffer de textura ao shader (será usado no fragment shader).
+	glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
 
 	// Habilita teste de profundidade.
 	glEnable(GL_DEPTH_TEST);
@@ -405,17 +338,56 @@ int main()
 		glLineWidth(10);
 		glPointSize(20);
 
+		// Criação da matriz model para aplicação de rotação.
+		glm::mat4 model = glm::mat4(1);
+		if (rotateX)
+		{
+			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1, 0, 0));
+		}
+		else if (rotateY)
+		{
+			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0, 1, 0));
+		}
+		else if (rotateZ)
+		{
+			// Embora deveria rotacional apenas sobre o Z, rotaciona também sobre X e Y para gerar uma representação visual melhor.
+			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1, -1, 1));
+		}
+		shader.setMat4("model", glm::value_ptr(model));
+
+		
+		// Criação da matriz projection para aplicação da escala.
+		glm::mat4 projection = glm::mat4(1);
+		if (zoomIn)
+		{
+			zoomValue = zoomValue >= 0.7f ? zoomValue : zoomValue + 0.2f;
+			zoomIn = false;
+		}
+		else if (zoomOut)
+		{
+			zoomValue = zoomValue <= -0.7f ? zoomValue : zoomValue - 0.2f;
+			zoomOut = false;
+		}
+		projection = glm::scale(projection, glm::vec3((projection[0][0] + zoomValue) / 2, (projection[1][1] + zoomValue) / 2, (projection[2][2] + zoomValue) / 2));
+		shader.setMat4("projection", glm::value_ptr(projection));
+
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texID);
+
 		// Vincular VAO.
 		glBindVertexArray(VAO);
 
-		// Gera e imprime os quadrados.
-		generateSquare(shaderID, First);
-		generateSquare(shaderID, Second);
-		
-		// Desvincular VAO.
+		// Chama a função de desenho.
+		glDrawArrays(GL_TRIANGLES, 0, nVerts);
+
+		 // Desvincular VAO.
 		glBindVertexArray(0);
 
-		// Trocar buffer da janela.
+		// Desvincunlar a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}
 
