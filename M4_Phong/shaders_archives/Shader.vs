@@ -15,7 +15,6 @@ out vec3 scaledNormal;
 
 void main()
 {
-	//...pode ter mais linhas de código aqui!
 	gl_Position = projection * view * model * vec4(position, 1.0);
 	finalColor = color;
 	scaledNormal = normal;

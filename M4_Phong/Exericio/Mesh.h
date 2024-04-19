@@ -5,8 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Shader
 #include "Shader.h"
-
 
 class Mesh
 {
@@ -29,6 +29,5 @@ protected:
 
 	//Referência (endereço) do shader
 	Shader* shader;
-
 };
 

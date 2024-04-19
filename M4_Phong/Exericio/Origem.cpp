@@ -25,21 +25,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h";
 
+// USING.
 using namespace std;
 
 // Definições da janela.
 const GLuint WIDTH = 1000, HEIGHT = 1000;
-const char* WINDOW_TITLE = "M3_OBJ - Igor Bartmann";
+const char* WINDOW_TITLE = "M4_Phong - Igor Bartmann";
 
 // Variáveis auxiliares.
-bool rotateX = false, rotateY = false, rotateZ = false, zoomIn = false, zoomOut = false;
-float zoomValue = 0;
-
-/*Teste*/
 bool firstMouse = true;
 float lastX, lastY;
 float sensitivity = 0.05;
 float pitch = 0.0, yaw = -90.0;
+
 glm::vec3 cameraPos = glm::vec3(0.0, 0.0, 3.0);
 glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
 glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
@@ -57,45 +55,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
-	// Rotação.
-	if (key == GLFW_KEY_X)
-	{
-		rotateX = true;
-		rotateY = false;
-		rotateZ = false;
-	}
-	if (key == GLFW_KEY_Y)
-	{
-		rotateX = false;
-		rotateY = true;
-		rotateZ = false;
-	}
-	if (key == GLFW_KEY_Z)
-	{
-		rotateX = false;
-		rotateY = false;
-		rotateZ = true;
-	}
-	if (key == GLFW_KEY_SPACE)
-	{
-		rotateX = false;
-		rotateY = false;
-		rotateZ = false;
-	}
-
-	// Escala.
-	if (key == GLFW_KEY_I)
-	{
-		zoomIn = true;
-		zoomOut = false;
-	}
-	if (key == GLFW_KEY_O)
-	{
-		zoomIn = false;
-		zoomOut = true;
-	}
-
-	/*Teste*/
+	// Movimento.
 	float cameraSpeed = 0.05;
 	if (key == GLFW_KEY_W)
 	{
@@ -115,10 +75,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-/*Teste*/
+// Função para configurar o callback de entrada via mouse.
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	//cout << xpos << " " << ypos << endl;
 	if (firstMouse)
 	{
 		lastX = xpos;
@@ -283,51 +242,6 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	return VAO;
 }
 
-GLuint loadTexture(string filePath)
-{
-	GLuint texId;
-
-	// Gera a textura em memória.
-	glGenTextures(1, &texId);
-	glBindTexture(GL_TEXTURE_2D, texId);
-
-	// Configura os parâmetros.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Carrega a imagem da textura.
-	int width, height, nrChanels;
-	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChanels, 0);
-	if (data)
-	{
-		if (nrChanels == 3) // jpg
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		}
-		else //png
-		{ 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		}
-
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-	// Limpa o espaço armazenado.
-	stbi_image_free(data);
-
-	// Desvincula a textura.
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	return texId;
-}
-
 int main()
 {
 	// Inicializar GLFW.
@@ -344,17 +258,16 @@ int main()
 	// Vincular janela ao contexto atual.
 	glfwMakeContextCurrent(window);
 
-	// Registrar função de callback para a janela GLFW.
+	// Registrar função de callback via teclado para a janela GLFW.
 	glfwSetKeyCallback(window, key_callback);
 
-	/*Teste*/
+	// Registrar função de callback via mouse para a janela GLFW.
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	/*Teste*/
+	// Definir a posição do cursor.
 	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
 
-	/*Teste*/
-	//Desabilita o desenho do cursor 
+	// Desabilitar o desenho do cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// GLAD: carregar todos os ponteiros das funções da OpenGL.
@@ -377,44 +290,38 @@ int main()
 	// Obter a configuração do Program Shader.
 	Shader shader("../shaders_archives/Shader.vs", "../shaders_archives/Shader.fs");
 
-	// Carregar a textura.
-	GLuint texID = loadTexture("../cube_model/cube.png");
-
-	// Carregar a geometrica armazenada.
-	int nVerts;
-	GLuint VAO = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(0, 0, 0));
-
-	// Vinculação do program shader.
+	// Vincular o program shader.
 	glUseProgram(shader.ID);
 
-	// Associando o buffer de textura ao shader (será usado no fragment shader).
-	glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
+	// Matriz de visualização (posição e orientação da câmera).
+	glm::mat4 view = glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	shader.setMat4("view", value_ptr(view));
+
+	// Matriz de perspectiva (definindo o volume de visualização - frustum).
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)current_width / (float)current_height, 0.1f, 100.0f);
+	shader.setMat4("projection", glm::value_ptr(projection));
 
 	// Habilita teste de profundidade.
 	glEnable(GL_DEPTH_TEST);
 
-	/*Teste*/
-	//Matriz de view -- posição e orientação da câmera
-	glm::mat4 view = glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-	shader.setMat4("view", value_ptr(view));
+	// Carregar a geometrica armazenada.
+	int nVerts;
+	GLuint VAO1 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(1.0, 0.0, 0.0));
+	GLuint VAO2 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(0.0, 1.0, 0.0));
+	GLuint VAO3 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(1.0, 1.0, 1.0));
 
-	/*Teste*/
-	//Matriz de projeção perspectiva - definindo o volume de visualização (frustum)
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)WIDTH, 0.1f, 100.0f);
-	shader.setMat4("projection", glm::value_ptr(projection));
+	// Definir o objeto (malha) do cubo.
+	Mesh cube1, cube2, cube3;
+	cube1.initialize(VAO1, nVerts, &shader, glm::vec3(-2.75, 0.0, 0.0));
+	cube2.initialize(VAO2, nVerts, &shader);
+	cube3.initialize(VAO3, nVerts, &shader, glm::vec3(2.75, 0.0, 0.0));
 
-	/*Teste*/
-	Mesh cube;
-	cube.initialize(VAO, nVerts, &shader, glm::vec3(-2.75, 0.0, 0.0));
-
-	/*Teste*/
 	//Definindo as propriedades do material da superficie
 	shader.setFloat("ka", 0.2);
 	shader.setFloat("kd", 0.5);
 	shader.setFloat("ks", 0.5);
 	shader.setFloat("q", 10.0);
 
-	/*Teste*/
 	//Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", -2.0, 10.0, 2.0);
 	shader.setVec3("lightColor", 1.0, 1.0, 0.0);
@@ -429,79 +336,38 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Defibir aluta da linha e do ponto.
 		glLineWidth(10);
 		glPointSize(20);
 
-		/*Teste*/
-		//Atualizando a posição e orientação da câmera
+		// Atualizar a posição e orientação da câmera.
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		shader.setMat4("view", glm::value_ptr(view));
 
-		/*Teste*/
-		//Atualizando o shader com a posição da câmera
+		// Atualizar o shader com a posição da câmera
 		shader.setVec3("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
 
-		/*Teste*/
 		// Chamada de desenho - drawcall
 		shader.setFloat("q", 10.0);
-		cube.update();
-		cube.draw();
+		cube1.update();
+		cube1.draw();
 
-		//// Criação da matriz model para aplicação de rotação.
-		//glm::mat4 model = glm::mat4(1);
-		//if (rotateX)
-		//{
-		//	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1, 0, 0));
-		//}
-		//else if (rotateY)
-		//{
-		//	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0, 1, 0));
-		//}
-		//else if (rotateZ)
-		//{
-		//	// Embora deveria rotacional apenas sobre o Z, rotaciona também sobre X e Y para gerar uma representação visual melhor.
-		//	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1, -1, 1));
-		//}
-		//shader.setMat4("model", glm::value_ptr(model));
+		shader.setFloat("q", 1.0);
+		cube2.update();
+		cube2.draw();
 
-		
-		//// Criação da matriz projection para aplicação da escala.
-		//glm::mat4 projection = glm::mat4(1);
-		//if (zoomIn)
-		//{
-		//	zoomValue = zoomValue >= 0.7f ? zoomValue : zoomValue + 0.2f;
-		//	zoomIn = false;
-		//}
-		//else if (zoomOut)
-		//{
-		//	zoomValue = zoomValue <= -0.7f ? zoomValue : zoomValue - 0.2f;
-		//	zoomOut = false;
-		//}
-		//projection = glm::scale(projection, glm::vec3((projection[0][0] + zoomValue) / 2, (projection[1][1] + zoomValue) / 2, (projection[2][2] + zoomValue) / 2));
-		//shader.setMat4("projection", glm::value_ptr(projection));
-
-		// Ativação da textura.
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texID);
-
-		// Vincular VAO.
-		glBindVertexArray(VAO);
-
-		// Chama a função de desenho.
-		glDrawArrays(GL_TRIANGLES, 0, nVerts);
-
-		 // Desvincular VAO.
-		glBindVertexArray(0);
-
-		// Desvincunlar a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);
+		shader.setFloat("q", 250.0);
+		cube3.update();
+		cube3.draw();
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}
 
 	// Deleta VAO para desalocar buffer.
-	glDeleteVertexArrays(1, &VAO);
+	glDeleteVertexArrays(1, &VAO1);
+	glDeleteVertexArrays(1, &VAO2);
+	glDeleteVertexArrays(1, &VAO3);
 
 	// Finalizar execução da GLFW.
 	glfwTerminate();
