@@ -21,6 +21,9 @@
 // MESH.
 #include "Mesh.h"
 
+// Camera.
+#include "Camera.h"
+
 // STB_IMAGE.
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h";
@@ -33,14 +36,8 @@ const GLuint WIDTH = 1000, HEIGHT = 1000;
 const char* WINDOW_TITLE = "M5_Camera - Igor Bartmann";
 
 // Variáveis auxiliares.
-bool firstMouse = true;
-float lastX, lastY;
-float sensitivity = 0.05;
-float pitch = 0.0, yaw = -90.0;
-
-glm::vec3 cameraPos = glm::vec3(0.0, 0.0, 3.0);
-glm::vec3 cameraFront = glm::vec3(0.0, 0.0, -1.0);
-glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
+Camera camera;
+float fov = 1.0f;
 
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -56,52 +53,44 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 
 	// Movimento.
-	float cameraSpeed = 0.05;
 	if (key == GLFW_KEY_W)
 	{
-		cameraPos += cameraFront * cameraSpeed;
+		camera.moveFront();
 	}
 	if (key == GLFW_KEY_S)
 	{
-		cameraPos -= cameraFront * cameraSpeed;
+		camera.moveBack();
 	}
 	if (key == GLFW_KEY_A)
 	{
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		camera.moveLeft();
 	}
 	if (key == GLFW_KEY_D)
 	{
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		camera.moveRight();
 	}
 }
 
 // Função para configurar o callback de entrada via mouse.
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	if (firstMouse)
+	camera.updateMatrixByMousePosition(xpos, ypos);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
 	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
+		fov -= yoffset;
 	}
-
-	float offsetx = xpos - lastX;
-	float offsety = lastY - ypos;
-
-	lastX = xpos;
-	lastY = ypos;
-
-	offsetx *= sensitivity;
-	offsety *= sensitivity;
-
-	pitch += offsety;
-	yaw += offsetx;
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+	else if (fov <= 1.0f) 
+	{
+		fov = 1.0f;
+	}
+	else if (fov >= 45.0f)
+	{
+		fov = 45.0f;
+	}
 }
 
 int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
@@ -264,6 +253,8 @@ int main()
 	// Registrar função de callback via mouse para a janela GLFW.
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	glfwSetScrollCallback(window, scroll_callback);
+
 	// Definir a posição do cursor.
 	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
 
@@ -293,13 +284,16 @@ int main()
 	// Vincular o program shader.
 	glUseProgram(shader.ID);
 
+	// Câmera.
+	camera.initialize((float)current_width, (float)current_height);
+
 	// Matriz de visualização (posição e orientação da câmera).
-	glm::mat4 view = glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-	shader.setMat4("view", value_ptr(view));
+	glm::mat4 cameraView = camera.getCameraView();
+	shader.setMat4("view", value_ptr(cameraView));
 
 	// Matriz de perspectiva (definindo o volume de visualização - frustum).
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)current_width / (float)current_height, 0.1f, 100.0f);
-	shader.setMat4("projection", glm::value_ptr(projection));
+	glm::mat4 cameraProjection = camera.getCameraProjection();
+	shader.setMat4("projection", glm::value_ptr(cameraProjection));
 
 	// Habilita teste de profundidade.
 	glEnable(GL_DEPTH_TEST);
@@ -341,11 +335,13 @@ int main()
 		glPointSize(20);
 
 		// Atualizar a posição e orientação da câmera.
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		shader.setMat4("view", glm::value_ptr(view));
+		camera.recalculateCameraView();
+		glm::mat4 cameraView = camera.getCameraView();
+		shader.setMat4("view", glm::value_ptr(cameraView));
 
 		// Atualizar o shader com a posição da câmera
-		shader.setVec3("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
+		glm::vec3 cameraPosition = camera.getCameraPosition();
+		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		// Chamada de desenho - drawcall
 		shader.setFloat("q", 10.0);
