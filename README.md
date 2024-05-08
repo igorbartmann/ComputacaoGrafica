@@ -6,3 +6,4 @@ Repositório para as atividades de Computação Gráfica.
 - M3_OBJ - Atividade do Módulo 3: carregando arquivo OBJ.
 - M4_Phong - Atividade do Módulo 4: Trabalhando com Luminosidade.
 - M5_Camera - Atividade do Módulo 5: Trabalhando com Câmera e Perspectiva.
+- M6_CurvasParametricas - Atividade do Módulo 6: Trabalhando com curvas paramétricas de forma a definir trajetória para objetos.
