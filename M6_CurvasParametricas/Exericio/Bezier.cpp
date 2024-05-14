@@ -19,7 +19,6 @@ void Bezier::generateCurve(int pointsPerSegment)
 
 	for (int i = 0; i < nControlPoints - 3; i += 3)
 	{
-
 		for (float t = 0.0; t <= 1.0; t += step)
 		{
 			glm::vec3 p;
@@ -33,7 +32,7 @@ void Bezier::generateCurve(int pointsPerSegment)
 
 			glm::mat4x3 G(P0, P1, P2, P3);
 
-			p = G * M * T;  //---------
+			p = G * M * T;
 
 			curvePoints.push_back(p);
 		}
