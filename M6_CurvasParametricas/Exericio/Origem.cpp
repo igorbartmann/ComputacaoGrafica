@@ -137,7 +137,7 @@ GLuint generateVaoFromPointsSet(vector <glm::vec3> pointsSet)
 }
 
 // Gera o quadrado a partir do ponto.
-vector <glm::vec3> generateSquareFomPoint(glm::vec3 point)
+vector <glm::vec3> generateSquareFromPoint(glm::vec3 point)
 {
 	vector <glm::vec3> vertices;
 
@@ -238,7 +238,7 @@ int main()
 
 		// Gera VAO para ponto de curva A.
 		pointBaseSquareA = bezier.getPointOnCurve(positionSquareA);
-		pointsSquareA = generateSquareFomPoint(pointBaseSquareA);
+		pointsSquareA = generateSquareFromPoint(pointBaseSquareA);
 		GLuint VaoSquareA = generateVaoFromPointsSet(pointsSquareA);
 
 		// Vincula o VAO do ponto de curva.
@@ -255,7 +255,7 @@ int main()
 
 		// Gera VAO para ponto de curva B.
 		pointBaseSquareB = bezier.getPointOnCurve(positionSquareB);
-		pointsSquareB = generateSquareFomPoint(pointBaseSquareB);
+		pointsSquareB = generateSquareFromPoint(pointBaseSquareB);
 		GLuint VaoSquareB = generateVaoFromPointsSet(pointsSquareB);
 
 		// Vincula o VAO do ponto de curva.

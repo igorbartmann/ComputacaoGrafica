@@ -1,0 +1,16 @@
+REQUISITOS DA AVALIAÇÃO:
+------------------------
+V1) Ler mais de um OBJ.
+
+V2) Ter uma fonte de luz (modelo Phong).
+=> Coeficientes (ka, ks e kd) do arquivo mtl.
+
+V3) Promover navegabilidade pela cena através do controle da câmera via mouse/teclado.
+
+V4) Permitir a seleção de objetos da cena, via mouse/teclado, e movimentá-los.
+=> Ideia, ao selecionar o cubo, possibilitar girá-lo nos eixos 'xyz' e movê-lo para tras/frente.
+
+V5) A especificação dos objetos deve ser feita via um aruqivo de cofniguração da cena. Neste aruivo deve conter:
+a) .OBJs a serem carregados (com nome do arquivo, transformações iniciais e animações com curvas paramétricas).
+b) Informações da fonte de luz.
+c) Posição e orientação inicial da câmera, assim como a definição do frustrum.

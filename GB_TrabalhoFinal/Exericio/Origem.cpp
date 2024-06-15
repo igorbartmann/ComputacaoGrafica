@@ -57,15 +57,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		camera.moveFront();
 	}
-	if (key == GLFW_KEY_S)
+	else if (key == GLFW_KEY_S)
 	{
 		camera.moveBack();
 	}
-	if (key == GLFW_KEY_A)
+	else if (key == GLFW_KEY_A)
 	{
 		camera.moveLeft();
 	}
-	if (key == GLFW_KEY_D)
+	else if (key == GLFW_KEY_D)
 	{
 		camera.moveRight();
 	}
@@ -77,6 +77,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	camera.updateMatrixByMousePosition(xpos, ypos);
 }
 
+// Função para configurar o callback de entrada via scroll.
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (fov >= 1.0f && fov <= 45.0f)
@@ -93,6 +94,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
+// Função para carregar um arquivo obj.
 int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
 {
 	vector <glm::vec3> vertices;
@@ -121,21 +123,18 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 			{
 				glm::vec3 v;
 				ssline >> v.x >> v.y >> v.z;
-
 				vertices.push_back(v);
 			}
 			if (word == "vt")
 			{
 				glm::vec2 vt;
 				ssline >> vt.s >> vt.t;
-
 				texCoords.push_back(vt);
 			}
 			if (word == "vn")
 			{
 				glm::vec3 vn;
 				ssline >> vn.x >> vn.y >> vn.z;
-
 				normals.push_back(vn);
 			}
 			if (word == "f")
@@ -231,6 +230,7 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	return VAO;
 }
 
+// Função principal do programa.
 int main()
 {
 	// Inicializar GLFW.
@@ -253,10 +253,11 @@ int main()
 	// Registrar função de callback via mouse para a janela GLFW.
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	// Registrar função de callback via scroll para a janela GLFW.
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// Definir a posição do cursor.
-	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
+	glfwSetCursorPos(window, ((double)WIDTH / 2), ((double)HEIGHT / 2));
 
 	// Desabilitar o desenho do cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
