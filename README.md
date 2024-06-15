@@ -7,3 +7,4 @@ Repositório para as atividades de Computação Gráfica.
 - M4_Phong - Atividade do Módulo 4: Trabalhando com Luminosidade.
 - M5_Camera - Atividade do Módulo 5: Trabalhando com Câmera e Perspectiva.
 - M6_CurvasParametricas - Atividade do Módulo 6: Trabalhando com curvas paramétricas de forma a definir trajetória para objetos.
+- GB_TrabalhoFinal - Atividade do Grau B: Atividade final da cadeira de computação gráfica.
