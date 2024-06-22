@@ -31,15 +31,15 @@
 // USING.
 using namespace std;
 
-// Definições da janela.
+// Definiï¿½ï¿½es da janela.
 const GLuint WIDTH = 1000, HEIGHT = 1000;
 const char* WINDOW_TITLE = "Trabalho Final - GB (Igor Bartmann e Lucas)";
 
-// Variáveis auxiliares.
+// Variï¿½veis auxiliares.
 Camera camera;
 float fov = 1.0f;
 
-// Função para configurar callback de entrada via teclado.
+// Funï¿½ï¿½o para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (action != GLFW_PRESS)
@@ -71,20 +71,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-// Função para configurar o callback de entrada via mouse.
+// Funï¿½ï¿½o para configurar o callback de entrada via mouse.
+double mouseX, mouseY;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	camera.updateMatrixByMousePosition(xpos, ypos);
+	mouseX = xpos;
+    mouseY = ypos;
 }
 
-// Função para configurar o callback de entrada via scroll.
+
+// Funï¿½ï¿½o para configurar o callback de entrada via scroll.
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (fov >= 1.0f && fov <= 45.0f)
 	{
 		fov -= yoffset;
 	}
-	else if (fov <= 1.0f) 
+	else if (fov <= 1.0f)
 	{
 		fov = 1.0f;
 	}
@@ -94,7 +98,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-// Função para carregar um arquivo obj.
+// Funï¿½ï¿½o para carregar um arquivo obj.
 int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
 {
 	vector <glm::vec3> vertices;
@@ -188,23 +192,23 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 
 	nVerts = vbuffer.size() / 11;
 
-	//Geração do identificador do VBO
+	//Geraï¿½ï¿½o do identificador do VBO
 	glGenBuffers(1, &VBO);
 
-	//Faz a conexão (vincula) do buffer como um buffer de array
+	//Faz a conexï¿½o (vincula) do buffer como um buffer de array
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	//Envia os dados do array de floats para o buffer da OpenGl
 	glBufferData(GL_ARRAY_BUFFER, vbuffer.size() * sizeof(GLfloat), vbuffer.data(), GL_STATIC_DRAW);
 
-	//Geração do identificador do VAO (Vertex Array Object)
+	//Geraï¿½ï¿½o do identificador do VAO (Vertex Array Object)
 	glGenVertexArrays(1, &VAO);
 
-	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
-	// e os ponteiros para os atributos 
+	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vï¿½rtices
+	// e os ponteiros para os atributos
 	glBindVertexArray(VAO);
 
-	//Atributo posição (x, y, z)
+	//Atributo posiï¿½ï¿½o (x, y, z)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 
@@ -216,27 +220,50 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
-	//Atributo normal do vértice (x, y, z)
+	//Atributo normal do vï¿½rtice (x, y, z)
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(3);
 
-	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice 
-	// atualmente vinculado - para que depois possamos desvincular com segurança.
+	// Observe que isso ï¿½ permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vï¿½rtice
+	// atualmente vinculado - para que depois possamos desvincular com seguranï¿½a.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
+	// Desvincula o VAO (ï¿½ uma boa prï¿½tica desvincular qualquer buffer ou array para evitar bugs medonhos)
 	glBindVertexArray(0);
 
 	return VAO;
 }
 
-// Função principal do programa.
+
+GLuint crosshairVAO, crosshairVBO;
+void initCrosshair() {
+    float crosshairVertices[] = {
+        0.0f, 0.0f // Center of the screen
+    };
+
+    glGenVertexArrays(1, &crosshairVAO);
+    glGenBuffers(1, &crosshairVBO);
+
+    glBindVertexArray(crosshairVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+
+// Funï¿½ï¿½o principal do programa.
 int main()
 {
 	// Inicializar GLFW.
 	glfwInit();
 
-	// Definir versão.
+	// Definir versï¿½o.
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -252,52 +279,56 @@ int main()
 	// Vincular janela ao contexto atual.
 	glfwMakeContextCurrent(window);
 
-	// Registrar função de callback via teclado para a janela GLFW.
+	// Registrar funï¿½ï¿½o de callback via teclado para a janela GLFW.
 	glfwSetKeyCallback(window, key_callback);
 
-	// Registrar função de callback via mouse para a janela GLFW.
+	// Registrar funï¿½ï¿½o de callback via mouse para a janela GLFW.
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	// Registrar função de callback via scroll para a janela GLFW.
+	// Registrar funï¿½ï¿½o de callback via scroll para a janela GLFW.
 	glfwSetScrollCallback(window, scroll_callback);
 
-	// Definir a posição do cursor.
+	// Definir a posiï¿½ï¿½o do cursor.
 	glfwSetCursorPos(window, ((double)WIDTH / 2), ((double)HEIGHT / 2));
 
 	// Desabilitar o desenho do cursor.
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-	// GLAD: carregar todos os ponteiros das funções da OpenGL.
+	// GLAD: carregar todos os ponteiros das funï¿½ï¿½es da OpenGL.
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 	}
 
-	// Obter e imprimir informações de versão.
+	// Obter e imprimir informaï¿½ï¿½es de versï¿½o.
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	const GLubyte* version = glGetString(GL_VERSION);
 	cout << "Renderer: " << renderer << endl;
 	cout << "OpenGL version supported " << version << endl;
 
-	// Definir dimensões da view port de acordo com a janela da aplicação.
+	// Definir dimensï¿½es da view port de acordo com a janela da aplicaï¿½ï¿½o.
 	int current_width, current_height;
 	glfwGetFramebufferSize(window, &current_width, &current_height);
 	glViewport(0, 0, current_width, current_height);
 
-	// Obter a configuração do Program Shader.
+	// Obter a configuraï¿½ï¿½o do Program Shader.
 	Shader shader("../shaders_archives/Shader.vs", "../shaders_archives/Shader.fs");
+
+	// Crosshair
+	initCrosshair();
+	Shader crosshairShader("../shaders_archives/crosshair.vs", "../shaders_archives/crosshair.fs");
 
 	// Vincular o program shader.
 	glUseProgram(shader.ID);
 
-	// Câmera.
+	// Cï¿½mera.
 	camera.initialize((float)current_width, (float)current_height);
 
-	// Matriz de visualização (posição e orientação da câmera).
+	// Matriz de visualizaï¿½ï¿½o (posiï¿½ï¿½o e orientaï¿½ï¿½o da cï¿½mera).
 	glm::mat4 cameraView = camera.getCameraView();
 	shader.setMat4("view", value_ptr(cameraView));
 
-	// Matriz de perspectiva (definindo o volume de visualização - frustum).
+	// Matriz de perspectiva (definindo o volume de visualizaï¿½ï¿½o - frustum).
 	glm::mat4 cameraProjection = camera.getCameraProjection();
 	shader.setMat4("projection", glm::value_ptr(cameraProjection));
 
@@ -326,9 +357,10 @@ int main()
 	shader.setVec3("lightPos", -2.0, 10.0, 2.0);
 	shader.setVec3("lightColor", 1.0, 1.0, 0.0);
 
-	// Laço principal da execução.
+	// Laï¿½o principal da execuï¿½ï¿½o.
 	while (!glfwWindowShouldClose(window))
 	{
+		glUseProgram(shader.ID);
 		// Checar e tratar eventos de input.
 		glfwPollEvents();
 
@@ -340,12 +372,12 @@ int main()
 		glLineWidth(10);
 		glPointSize(20);
 
-		// Atualizar a posição e orientação da câmera.
+		// Atualizar a posiï¿½ï¿½o e orientaï¿½ï¿½o da cï¿½mera.
 		camera.recalculateCameraView();
 		glm::mat4 cameraView = camera.getCameraView();
 		shader.setMat4("view", glm::value_ptr(cameraView));
 
-		// Atualizar o shader com a posição da câmera
+		// Atualizar o shader com a posiï¿½ï¿½o da cï¿½mera
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
@@ -362,6 +394,11 @@ int main()
 		cube3.update();
 		cube3.draw();
 
+		glUseProgram(crosshairShader.ID);
+		glBindVertexArray(crosshairVAO);
+		glDrawArrays(GL_POINTS, 0, 1);
+		glBindVertexArray(0);
+
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}
@@ -370,8 +407,9 @@ int main()
 	glDeleteVertexArrays(1, &VAO1);
 	glDeleteVertexArrays(1, &VAO2);
 	glDeleteVertexArrays(1, &VAO3);
+	glDeleteVertexArrays(1, &crosshairVAO);
 
-	// Finalizar execução da GLFW.
+	// Finalizar execuï¿½ï¿½o da GLFW.
 	glfwTerminate();
 
 	return 0;
