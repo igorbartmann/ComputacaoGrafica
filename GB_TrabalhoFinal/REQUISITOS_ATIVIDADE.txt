@@ -1,11 +1,11 @@
 REQUISITOS DA AVALIAÇÃO:
 ------------------------
-V1) Ler mais de um OBJ.
+V1) Ler mais de um OBJ.[FEITO]
 
-V2) Ter uma fonte de luz (modelo Phong).
+V2) Ter uma fonte de luz (modelo Phong). [PARCIAL - PROPRIEDADES ESTÃO MOCADAS NO CODIGO-FONTE]
 => Coeficientes (ka, ks e kd) do arquivo mtl.
 
-V3) Promover navegabilidade pela cena através do controle da câmera via mouse/teclado.
+V3) Promover navegabilidade pela cena através do controle da câmera via mouse/teclado. [FEITO]
 
 V4) Permitir a seleção de objetos da cena, via mouse/teclado, e movimentá-los.
 => Ideia, ao selecionar o cubo, possibilitar girá-lo nos eixos 'xyz' e movê-lo para tras/frente.

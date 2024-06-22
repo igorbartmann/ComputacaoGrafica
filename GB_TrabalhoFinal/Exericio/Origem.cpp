@@ -336,16 +336,16 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// Carregar a geometrica armazenada.
-	int nVerts;
-	GLuint VAO1 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(1.0, 0.0, 0.0));
-	GLuint VAO2 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(0.0, 1.0, 0.0));
-	GLuint VAO3 = loadSimpleOBJ("../cube_model/cube.obj", nVerts, glm::vec3(1.0, 1.0, 1.0));
+	int nVertsCube1, nVertsSuzanne, nVertsCube2;
+	GLuint VAO1 = loadSimpleOBJ("../models_archives/cube_model/cube.obj", nVertsCube1, glm::vec3(1.0, 0.0, 0.0));
+	GLuint VAO2 = loadSimpleOBJ("../models_archives/suzanne_model/suzanneTriLowPoly.obj", nVertsSuzanne, glm::vec3(0.0, 1.0, 0.0));
+	GLuint VAO3 = loadSimpleOBJ("../models_archives/cube_model/cube.obj", nVertsCube2, glm::vec3(1.0, 1.0, 0.0));
 
 	// Definir o objeto (malha) do cubo.
-	Mesh cube1, cube2, cube3;
-	cube1.initialize(VAO1, nVerts, &shader, glm::vec3(-2.75, 0.0, 0.0));
-	cube2.initialize(VAO2, nVerts, &shader);
-	cube3.initialize(VAO3, nVerts, &shader, glm::vec3(2.75, 0.0, 0.0));
+	Mesh cube1, suzanne, cube2;
+	cube1.initialize(VAO1, nVertsCube1, &shader, glm::vec3(-2.0, 0.0, 0.0));
+	suzanne.initialize(VAO2, nVertsSuzanne, &shader, glm::vec3(0.0, 0.0, 0.0));
+	cube2.initialize(VAO3, nVertsCube2, &shader, glm::vec3(2.0, 0.0, 0.0));
 
 	//Definindo as propriedades do material da superficie
 	shader.setFloat("ka", 0.2);
@@ -387,12 +387,12 @@ int main()
 		cube1.draw();
 
 		shader.setFloat("q", 1.0);
-		cube2.update();
-		cube2.draw();
+		suzanne.update();
+		suzanne.draw();
 
 		shader.setFloat("q", 250.0);
-		cube3.update();
-		cube3.draw();
+		cube2.update();
+		cube2.draw();
 
 		glUseProgram(crosshairShader.ID);
 		glBindVertexArray(crosshairVAO);
