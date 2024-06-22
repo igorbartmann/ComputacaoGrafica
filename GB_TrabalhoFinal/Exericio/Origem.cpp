@@ -230,6 +230,51 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	return VAO;
 }
 
+GLuint loadTexture(string filePath)
+{
+	GLuint texId;
+
+	// Gera a textura em memória.
+	glGenTextures(1, &texId);
+	glBindTexture(GL_TEXTURE_2D, texId);
+
+	// Configura os parâmetros.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Carrega a imagem da textura.
+	int width, height, nrChanels;
+	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChanels, 0);
+	if (data)
+	{
+		if (nrChanels == 3) // jpg
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+		else //png
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	// Limpa o espaço armazenado.
+	stbi_image_free(data);
+
+	// Desvincula a textura.
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texId;
+}
+
 // Função principal do programa.
 int main()
 {
@@ -290,6 +335,18 @@ int main()
 	// Vincular o program shader.
 	glUseProgram(shader.ID);
 
+	// Carregar a textura.
+	GLuint texID = loadTexture("../models_archives/cube_model/cube.png");
+
+	//// Associando o buffer de textura ao shader (será usado no fragment shader).
+	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
+
+	// Carregar a textura.
+	GLuint texID2 = loadTexture("../models_archives/suzanne_model/suzanne.png");
+
+	//// Associando o buffer de textura ao shader (será usado no fragment shader).
+	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
+
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
 
@@ -349,18 +406,48 @@ int main()
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texID);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
+		shader.setInt("tex_buffer", 0);
+
 		// Chamada de desenho - drawcall
 		shader.setFloat("q", 10.0);
 		cube1.update();
 		cube1.draw();
 
-		shader.setFloat("q", 1.0);
-		suzanne.update();
-		suzanne.draw();
+		// Desvincunlar a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texID);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
+		shader.setInt("tex_buffer", 0);
 
 		shader.setFloat("q", 250.0);
 		cube2.update();
 		cube2.draw();
+
+		// Desvincunlar a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texID2);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
+		shader.setInt("tex_buffer", 1);
+
+		shader.setFloat("q", 1.0);
+		suzanne.update();
+		suzanne.draw();
+
+		// Desvincunlar a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);		
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);

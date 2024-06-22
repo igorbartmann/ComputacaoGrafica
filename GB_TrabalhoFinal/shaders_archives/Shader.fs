@@ -3,8 +3,12 @@
 in vec3 finalColor;
 in vec3 fragPos;
 in vec3 scaledNormal;
+in vec2 texCoord;
 
 out vec4 color;
+
+//Textura
+uniform sampler2D tex_buffer;
 
 //Propriedades da superficie
 uniform float ka;
@@ -39,5 +43,5 @@ void main()
 
 	vec3 result = (ambient + diffuse) * finalColor + specular;
 
-	color = vec4(result,1.0);
+	color = texture(tex_buffer, texCoord); //Somente textura
 }

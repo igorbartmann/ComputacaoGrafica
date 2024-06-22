@@ -12,6 +12,7 @@ uniform mat4 projection;
 out vec3 finalColor;
 out vec3 fragPos;
 out vec3 scaledNormal;
+out vec2 texCoord;
 
 void main()
 {
@@ -19,4 +20,5 @@ void main()
 	finalColor = color;
 	fragPos = vec3(model * vec4(position, 1.0));
 	scaledNormal = vec3(model * vec4(normal, 1.0));
+	texCoord = vec2(texc.x, 1 - texc.y);
 }
