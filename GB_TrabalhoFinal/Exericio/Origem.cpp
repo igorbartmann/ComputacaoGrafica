@@ -26,7 +26,7 @@
 
 // STB_IMAGE.
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h";
+#include "stb_image.h"
 
 // USING.
 using namespace std;
@@ -238,8 +238,13 @@ int main()
 
 	// Definir versão.
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
 	// Criar janela GLFW.
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, WINDOW_TITLE, nullptr, nullptr);

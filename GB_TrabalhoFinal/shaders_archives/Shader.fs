@@ -1,4 +1,4 @@
-#version 450
+#version 410
 
 in vec3 finalColor;
 in vec3 fragPos;
