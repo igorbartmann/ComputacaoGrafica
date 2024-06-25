@@ -31,15 +31,15 @@
 // USING.
 using namespace std;
 
-// DefiniÁıes da janela.
+// Defini√ß√µes da janela.
 const GLuint WIDTH = 1000, HEIGHT = 1000;
 const char* WINDOW_TITLE = "Trabalho Final - GB (Igor Bartmann e Lucas)";
 
-// Vari·veis auxiliares.
+// Vari√°veis auxiliares.
 Camera camera;
 float fov = 1.0f;
 
-// FunÁ„o para configurar callback de entrada via teclado.
+// Fun√ß√£o para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (action != GLFW_PRESS)
@@ -71,20 +71,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-// FunÁ„o para configurar o callback de entrada via mouse.
+// Fun√ß√£o para configurar o callback de entrada via mouse.
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	camera.updateMatrixByMousePosition(xpos, ypos);
 }
 
-// FunÁ„o para configurar o callback de entrada via scroll.
+// Fun√ß√£o para configurar o callback de entrada via scroll.
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (fov >= 1.0f && fov <= 45.0f)
 	{
 		fov -= yoffset;
 	}
-	else if (fov <= 1.0f) 
+	else if (fov <= 1.0f)
 	{
 		fov = 1.0f;
 	}
@@ -94,7 +94,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-// FunÁ„o para carregar um arquivo obj.
+// Fun√ß√£o para carregar um arquivo obj.
 int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
 {
 	vector <glm::vec3> vertices;
@@ -188,23 +188,23 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 
 	nVerts = vbuffer.size() / 11;
 
-	//GeraÁ„o do identificador do VBO
+	//Gera√ß√£o do identificador do VBO
 	glGenBuffers(1, &VBO);
 
-	//Faz a conex„o (vincula) do buffer como um buffer de array
+	//Faz a conex√£o (vincula) do buffer como um buffer de array
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	//Envia os dados do array de floats para o buffer da OpenGl
+	//Envia os dados do array de floats para o buffer da OpenGL
 	glBufferData(GL_ARRAY_BUFFER, vbuffer.size() * sizeof(GLfloat), vbuffer.data(), GL_STATIC_DRAW);
 
-	//GeraÁ„o do identificador do VAO (Vertex Array Object)
+	//Gera√ß√£o do identificador do VAO (Vertex Array Object)
 	glGenVertexArrays(1, &VAO);
 
-	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vÈrtices
-	// e os ponteiros para os atributos 
+	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de v√©rtices
+	// e os ponteiros para os atributos
 	glBindVertexArray(VAO);
 
-	//Atributo posiÁ„o (x, y, z)
+	//Atributo posi√ß√£o (x, y, z)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 
@@ -216,15 +216,15 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
-	//Atributo normal do vÈrtice (x, y, z)
+	//Atributo normal do v√©rtice (x, y, z)
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(3);
 
-	// Observe que isso È permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vÈrtice 
-	// atualmente vinculado - para que depois possamos desvincular com seguranÁa.
+	// Observe que isso √© permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de v√©rtice
+	// atualmente vinculado - para que depois possamos desvincular com seguran√ßa.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// Desvincula o VAO (È uma boa pr·tica desvincular qualquer buffer ou array para evitar bugs medonhos)
+	// Desvincula o VAO (√© uma boa pr√°tica desvincular qualquer buffer ou array para evitar bugs medonhos)
 	glBindVertexArray(0);
 
 	return VAO;
@@ -234,11 +234,11 @@ GLuint loadTexture(string filePath)
 {
 	GLuint texId;
 
-	// Gera a textura em memÛria.
+	// Gera a textura em mem√≥ria.
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
 
-	// Configura os par‚metros.
+	// Configura os par√¢metros.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -246,11 +246,11 @@ GLuint loadTexture(string filePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Carrega a imagem da textura.
-	int width, height, nrChanels;
-	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChanels, 0);
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
 	if (data)
 	{
-		if (nrChanels == 3) // jpg
+		if (nrChannels == 3) // jpg
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
@@ -266,7 +266,7 @@ GLuint loadTexture(string filePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 
-	// Limpa o espaÁo armazenado.
+	// Limpa o espa√ßo armazenado.
 	stbi_image_free(data);
 
 	// Desvincula a textura.
@@ -275,13 +275,13 @@ GLuint loadTexture(string filePath)
 	return texId;
 }
 
-// FunÁ„o principal do programa.
+// Fun√ß√£o principal do programa.
 int main()
 {
 	// Inicializar GLFW.
 	glfwInit();
 
-	// Definir vers„o.
+	// Definir vers√£o.
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -297,39 +297,39 @@ int main()
 	// Vincular janela ao contexto atual.
 	glfwMakeContextCurrent(window);
 
-	// Registrar funÁ„o de callback via teclado para a janela GLFW.
+	// Registrar fun√ß√£o de callback via teclado para a janela GLFW.
 	glfwSetKeyCallback(window, key_callback);
 
-	// Registrar funÁ„o de callback via mouse para a janela GLFW.
+	// Registrar fun√ß√£o de callback via mouse para a janela GLFW.
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	// Registrar funÁ„o de callback via scroll para a janela GLFW.
+	// Registrar fun√ß√£o de callback via scroll para a janela GLFW.
 	glfwSetScrollCallback(window, scroll_callback);
 
-	// Definir a posiÁ„o do cursor.
+	// Definir a posi√ß√£o do cursor.
 	glfwSetCursorPos(window, ((double)WIDTH / 2), ((double)HEIGHT / 2));
 
 	// Desabilitar o desenho do cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// GLAD: carregar todos os ponteiros das funÁıes da OpenGL.
+	// GLAD: carregar todos os ponteiros das fun√ß√µes da OpenGL.
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 	}
 
-	// Obter e imprimir informaÁıes de vers„o.
+	// Obter e imprimir informa√ß√µes de vers√£o.
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	const GLubyte* version = glGetString(GL_VERSION);
 	cout << "Renderer: " << renderer << endl;
 	cout << "OpenGL version supported " << version << endl;
 
-	// Definir dimensıes da view port de acordo com a janela da aplicaÁ„o.
+	// Definir dimens√µes da view port de acordo com a janela da aplica√ß√£o.
 	int current_width, current_height;
 	glfwGetFramebufferSize(window, &current_width, &current_height);
 	glViewport(0, 0, current_width, current_height);
 
-	// Obter a configuraÁ„o do Program Shader.
+	// Obter a configura√ß√£o do Program Shader.
 	Shader shader("../shaders_archives/Shader.vs", "../shaders_archives/Shader.fs");
 
 	// Vincular o program shader.
@@ -338,30 +338,30 @@ int main()
 	// Carregar a textura.
 	GLuint texID = loadTexture("../models_archives/cube_model/cube.png");
 
-	//// Associando o buffer de textura ao shader (ser· usado no fragment shader).
+	//// Associando o buffer de textura ao shader (ser√° usado no fragment shader).
 	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
 
 	// Carregar a textura.
 	GLuint texID2 = loadTexture("../models_archives/suzanne_model/suzanne.png");
 
-	//// Associando o buffer de textura ao shader (ser· usado no fragment shader).
+	//// Associando o buffer de textura ao shader (ser√° usado no fragment shader).
 	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
 
-	// C‚mera.
+	// C√¢mera.
 	camera.initialize((float)current_width, (float)current_height);
 
-	// Matriz de visualizaÁ„o (posiÁ„o e orientaÁ„o da c‚mera).
+	// Matriz de visualiza√ß√£o (posi√ß√£o e orienta√ß√£o da c√¢mera).
 	glm::mat4 cameraView = camera.getCameraView();
-	shader.setMat4("view", value_ptr(cameraView));
+	shader.setMat4("view", glm::value_ptr(cameraView));
 
-	// Matriz de perspectiva (definindo o volume de visualizaÁ„o - frustum).
+	// Matriz de perspectiva (definindo o volume de visualiza√ß√£o - frustum).
 	glm::mat4 cameraProjection = camera.getCameraProjection();
 	shader.setMat4("projection", glm::value_ptr(cameraProjection));
 
 	// Habilita teste de profundidade.
 	glEnable(GL_DEPTH_TEST);
 
-	// Carregar a geometrica armazenada.
+	// Carregar a geometria armazenada.
 	int nVertsCube1, nVertsSuzanne, nVertsCube2;
 	GLuint VAO1 = loadSimpleOBJ("../models_archives/cube_model/cube.obj", nVertsCube1, glm::vec3(1.0, 0.0, 0.0));
 	GLuint VAO2 = loadSimpleOBJ("../models_archives/suzanne_model/suzanneTriLowPoly.obj", nVertsSuzanne, glm::vec3(0.0, 1.0, 0.0));
@@ -373,7 +373,7 @@ int main()
 	suzanne.initialize(VAO2, nVertsSuzanne, &shader, glm::vec3(0.0, 0.0, 0.0));
 	cube2.initialize(VAO3, nVertsCube2, &shader, glm::vec3(2.0, 0.0, 0.0));
 
-	//Definindo as propriedades do material da superficie
+	//Definindo as propriedades do material da superf√≠cie
 	shader.setFloat("ka", 0.2);
 	shader.setFloat("kd", 0.5);
 	shader.setFloat("ks", 0.5);
@@ -383,7 +383,7 @@ int main()
 	shader.setVec3("lightPos", -2.0, 10.0, 2.0);
 	shader.setVec3("lightColor", 1.0, 1.0, 0.0);
 
-	// LaÁo principal da execuÁ„o.
+	// La√ßo principal da execu√ß√£o.
 	while (!glfwWindowShouldClose(window))
 	{
 		// Checar e tratar eventos de input.
@@ -393,24 +393,24 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Defibir aluta da linha e do ponto.
+		// Definir a largura da linha e do ponto.
 		glLineWidth(10);
 		glPointSize(20);
 
-		// Atualizar a posiÁ„o e orientaÁ„o da c‚mera.
+		// Atualizar a posi√ß√£o e orienta√ß√£o da c√¢mera.
 		camera.recalculateCameraView();
 		glm::mat4 cameraView = camera.getCameraView();
 		shader.setMat4("view", glm::value_ptr(cameraView));
 
-		// Atualizar o shader com a posiÁ„o da c‚mera
+		// Atualizar o shader com a posi√ß√£o da c√¢mera
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-		// AtivaÁ„o da textura.
+		// Ativa√ß√£o da textura.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texID);
 
-		// Associando o buffer de textura ao shader (ser· usado no fragment shader).
+		// Associando o buffer de textura ao shader (ser√° usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall
@@ -418,28 +418,28 @@ int main()
 		cube1.update();
 		cube1.draw();
 
-		// Desvincunlar a textura.
+		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		// AtivaÁ„o da textura.
+		// Ativa√ß√£o da textura.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texID);
 
-		// Associando o buffer de textura ao shader (ser· usado no fragment shader).
+		// Associando o buffer de textura ao shader (ser√° usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		shader.setFloat("q", 250.0);
 		cube2.update();
 		cube2.draw();
 
-		// Desvincunlar a textura.
+		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		// AtivaÁ„o da textura.
+		// Ativa√ß√£o da textura.
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texID2);
 
-		// Associando o buffer de textura ao shader (ser· usado no fragment shader).
+		// Associando o buffer de textura ao shader (ser√° usado no fragment shader).
 		shader.setInt("tex_buffer", 1);
 
 		shader.setFloat("q", 1.0);
@@ -447,7 +447,7 @@ int main()
 		suzanne.draw();
 
 		// Desvincunlar a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);		
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
@@ -458,7 +458,7 @@ int main()
 	glDeleteVertexArrays(1, &VAO2);
 	glDeleteVertexArrays(1, &VAO3);
 
-	// Finalizar execuÁ„o da GLFW.
+	// Finalizar execu√ß√£o da GLFW.
 	glfwTerminate();
 
 	return 0;
