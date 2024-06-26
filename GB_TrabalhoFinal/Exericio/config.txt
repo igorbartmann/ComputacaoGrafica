@@ -5,7 +5,17 @@ window_title = "Trabalho Final - GB (Igor Bartmann e Lucas)"
 
 # camera
 fov = 1.0
+position = (0.0, 0.0, 4.0)
+orientation = (1.0, 1.0, 0.0)
+view_x = (0.0, 0.0, 3.0)
+view_y = (0.0, 0.0, 0.0)
+view_z = (0.0, 1.0, 0.0)
 
+# Luz
+light_pos = (-2.0, 10.0, 2.0)
+light_color = (1.0, 1.0, 0.0, 0.0)
+
+# Shader
 vertex_shader_path = "../shaders_archives/Shader.vs"
 fragment_shader_path = "../shaders_archives/Shader.fs"
 
@@ -14,16 +24,24 @@ object1 = {
     obj_path = "../models_archives/cube_model/cube.obj"
     texture_path = "../models_archives/cube_model/cube.png"
     position = (-2.0, 0.0, 0.0)
+    translation = (0.0, 0.0, 0.0)
+    rotation = 0.0
+    scale = (1.0, 1.0, 1.0)
 }
 # Objeto 2
 object2 = {
     obj_path = "../models_archives/suzanne_model/suzanneTriLowPoly.obj"
     texture_path = "../models_archives/suzanne_model/suzanne.png"
     position = (0.0, 0.0, 0.0)
+    rotation = 0.0
+    scale = (1.0, 1.0, 1.0)
 }
 # Objeto 3
 object3 = {
     obj_path = "../models_archives/cube_model/cube.obj"
     texture_path = "../models_archives/cube_model/cube.png"
     position = (2.0, 0.0, 0.0)
+    translation = (0.0, 0.0, 0.0)
+    rotation = 0.0
+    scale = (1.0, 1.0, 1.0)
 }

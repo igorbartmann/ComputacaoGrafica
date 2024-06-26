@@ -10,7 +10,7 @@ using namespace std;
 class Camera
 {
 public:
-	Camera() 
+	Camera()
 	{
 		yaw = -90.0;;
 		pitch = 0.0f;
@@ -53,10 +53,21 @@ public:
 		return projection;
 	}
 
+	void setCameraProjection(glm::vec3 x, glm::vec3 y, glm::vec3 z)
+	{
+		view = glm::lookAt(x, y, z);
+	}
+
 	glm::vec3 getCameraPosition()
 	{
 		return cameraPosition;
 	}
+
+	void setCameraPosition(glm::vec3 new_cameraPosition)
+	{
+		cameraPosition = new_cameraPosition;
+	}
+
 	void moveFront()
 	{
 		cameraPosition += cameraFront * cameraSpeed;
@@ -122,7 +133,7 @@ protected:
 	float cameraSensitivity;
 	float mousePositionLastX;
 	float mousePositionLastY;
-		
+
 	glm::vec3 cameraPosition;
 	glm::vec3 cameraFront;
 	glm::vec3 cameraUp;

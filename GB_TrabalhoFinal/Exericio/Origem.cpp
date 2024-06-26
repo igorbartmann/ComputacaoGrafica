@@ -302,31 +302,40 @@ int main()
 
 	// Camera
 	fov = cfg.lookup("fov");
+	glm::vec3 camera_position((float)cfg.lookup("position")[0], (float)cfg.lookup("position")[1], (float)cfg.lookup("position")[2]);
+	glm::vec3 camera_orientation((float)cfg.lookup("orientation")[0], (float)cfg.lookup("orientation")[1], (float)cfg.lookup("orientation")[2]);
+
+	glm::vec3 camera_view_x((float)cfg.lookup("view_x")[0], (float)cfg.lookup("view_x")[1], (float)cfg.lookup("view_x")[2]);
+	glm::vec3 camera_view_y((float)cfg.lookup("view_y")[0], (float)cfg.lookup("view_y")[1], (float)cfg.lookup("view_y")[2]);
+	glm::vec3 camera_view_z((float)cfg.lookup("view_z")[0], (float)cfg.lookup("view_z")[1], (float)cfg.lookup("view_z")[2]);
 
 	// Shaders
-	const char * vertex_shader_path = cfg.lookup("vertex_shader_path");
-	const char * fragment_shader_path = cfg.lookup("fragment_shader_path");
+	const char* vertex_shader_path = cfg.lookup("vertex_shader_path");
+	const char* fragment_shader_path = cfg.lookup("fragment_shader_path");
 
 	// Object 1
 	const Setting& cfg_object1 = cfg.lookup("object1");
 	const char* obj1_obj_path = cfg_object1.lookup("obj_path");
 	const char* obj1_texture = cfg_object1.lookup("texture_path");
-	const libconfig::Setting& obj1_position_cfg = cfg_object1.lookup("position");
-	glm::vec3 obj1_position((float)obj1_position_cfg[0], (float)obj1_position_cfg[1], (float)obj1_position_cfg[2]);
+	glm::vec3 obj1_position((float)cfg_object1.lookup("position")[0], (float)cfg_object1.lookup("position")[1], (float)cfg_object1.lookup("position")[2]);
+	const float obj1_rotation = cfg_object1.lookup("rotation");
+	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1], (float)cfg_object1.lookup("scale")[2]);
 
 	// Object 2
 	const Setting& cfg_object2 = cfg.lookup("object2");
 	const char* obj2_obj_path = cfg_object2.lookup("obj_path");
 	const char* obj2_texture = cfg_object2.lookup("texture_path");
-	const libconfig::Setting& obj2_position_cfg = cfg_object2.lookup("position");
-	glm::vec3 obj2_position((float)obj2_position_cfg[0], (float)obj2_position_cfg[1], (float)obj2_position_cfg[2]);
+	glm::vec3 obj2_position((float)cfg_object2.lookup("position")[0], (float)cfg_object2.lookup("position")[1], (float)cfg_object2.lookup("position")[2]);
+	const float obj2_rotation = cfg_object2.lookup("rotation");
+	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1], (float)cfg_object2.lookup("scale")[2]);
 
 	// Object 3
 	const Setting& cfg_object3 = cfg.lookup("object3");
 	const char* obj3_obj_path = cfg_object3.lookup("obj_path");
 	const char* obj3_texture = cfg_object3.lookup("texture_path");
-	const libconfig::Setting& obj3_position_cfg = cfg_object3.lookup("position");
-	glm::vec3 obj3_position((float)obj3_position_cfg[0], (float)obj3_position_cfg[1], (float)obj3_position_cfg[2]);
+	glm::vec3 obj3_position((float)cfg_object3.lookup("position")[0], (float)cfg_object3.lookup("position")[1], (float)cfg_object3.lookup("position")[2]);
+	const float obj3_rotation = cfg_object3.lookup("rotation");
+	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1], (float)cfg_object3.lookup("scale")[2]);
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -393,6 +402,10 @@ int main()
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
 
+	camera.setCameraPosition(camera_position);
+
+	camera.setCameraProjection(camera_view_x, camera_view_y, camera_view_z);
+
 	// Matriz de visualização (posição e orientação da câmera).
 	glm::mat4 cameraView = camera.getCameraView();
 	shader.setMat4("view", glm::value_ptr(cameraView));
@@ -412,9 +425,9 @@ int main()
 
 	// Definir o objeto (malha) do cubo.
 	Mesh object1, object2, object3;
-	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position);
-	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position);
-	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position);
+	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_rotation);
+	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_rotation);
+	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_rotation);
 
 	//Definindo as propriedades do material da superfície
 	shader.setFloat("ka", 0.2);
@@ -423,8 +436,8 @@ int main()
 	shader.setFloat("q", 10.0);
 
 	//Definindo a fonte de luz pontual
-	shader.setVec3("lightPos", -2.0, 10.0, 2.0);
-	shader.setVec3("lightColor", 1.0, 1.0, 0.0);
+	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
+	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1], cfg.lookup("light_color")[2]);
 
 	// Laço principal da execução.
 	while (!glfwWindowShouldClose(window))
