@@ -320,6 +320,10 @@ int main()
 	glm::vec3 obj1_position((float)cfg_object1.lookup("position")[0], (float)cfg_object1.lookup("position")[1], (float)cfg_object1.lookup("position")[2]);
 	const float obj1_rotation = cfg_object1.lookup("rotation");
 	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1], (float)cfg_object1.lookup("scale")[2]);
+	const float obj1_ka = cfg_object1.lookup("ka");
+	const float obj1_kd = cfg_object1.lookup("kd");
+	const float obj1_ks = cfg_object1.lookup("ks");
+	const float obj1_q = cfg_object1.lookup("q");
 
 	// Object 2
 	const Setting& cfg_object2 = cfg.lookup("object2");
@@ -328,6 +332,10 @@ int main()
 	glm::vec3 obj2_position((float)cfg_object2.lookup("position")[0], (float)cfg_object2.lookup("position")[1], (float)cfg_object2.lookup("position")[2]);
 	const float obj2_rotation = cfg_object2.lookup("rotation");
 	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1], (float)cfg_object2.lookup("scale")[2]);
+	const float obj2_ka = cfg_object2.lookup("ka");
+	const float obj2_kd = cfg_object2.lookup("kd");
+	const float obj2_ks = cfg_object2.lookup("ks");
+	const float obj2_q = cfg_object2.lookup("q");
 
 	// Object 3
 	const Setting& cfg_object3 = cfg.lookup("object3");
@@ -336,6 +344,10 @@ int main()
 	glm::vec3 obj3_position((float)cfg_object3.lookup("position")[0], (float)cfg_object3.lookup("position")[1], (float)cfg_object3.lookup("position")[2]);
 	const float obj3_rotation = cfg_object3.lookup("rotation");
 	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1], (float)cfg_object3.lookup("scale")[2]);
+	const float obj3_ka = cfg_object3.lookup("ka");
+	const float obj3_kd = cfg_object3.lookup("kd");
+	const float obj3_ks = cfg_object3.lookup("ks");
+	const float obj3_q = cfg_object3.lookup("q");
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -429,12 +441,6 @@ int main()
 	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_rotation);
 	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_rotation);
 
-	//Definindo as propriedades do material da superfície
-	shader.setFloat("ka", 0.2);
-	shader.setFloat("kd", 0.5);
-	shader.setFloat("ks", 0.5);
-	shader.setFloat("q", 10.0);
-
 	//Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
 	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1], cfg.lookup("light_color")[2]);
@@ -463,6 +469,12 @@ int main()
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		// Object 1
+		// Definição material da superficie
+		shader.setFloat("ka", obj1_ka);
+		shader.setFloat("kd", obj1_kd);
+		shader.setFloat("ks", obj1_ks);
+		shader.setFloat("q", obj1_q);
+
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object1_texID);
@@ -479,6 +491,12 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Object 2
+		// Definição material da superficie
+		shader.setFloat("ka", obj2_ka);
+		shader.setFloat("kd", obj2_kd);
+		shader.setFloat("ks", obj2_ks);
+		shader.setFloat("q", obj2_q);
+
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object2_texID);
@@ -494,6 +512,12 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Object 3
+		// Definição material da superficie
+		shader.setFloat("ka", obj3_ka);
+		shader.setFloat("kd", obj3_kd);
+		shader.setFloat("ks", obj3_ks);
+		shader.setFloat("q", obj3_q);
+
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, object3_texID);
