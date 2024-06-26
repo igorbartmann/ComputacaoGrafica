@@ -1,0 +1,29 @@
+# Window settings
+window_width = 3456
+window_height = 2234
+window_title = "Trabalho Final - GB (Igor Bartmann e Lucas)"
+
+# camera
+fov = 1.0
+
+vertex_shader_path = "../shaders_archives/Shader.vs"
+fragment_shader_path = "../shaders_archives/Shader.fs"
+
+# Objeto 1
+object1 = {
+    obj_path = "../models_archives/cube_model/cube.obj"
+    texture_path = "../models_archives/cube_model/cube.png"
+    position = (-2.0, 0.0, 0.0)
+}
+# Objeto 2
+object2 = {
+    obj_path = "../models_archives/suzanne_model/suzanneTriLowPoly.obj"
+    texture_path = "../models_archives/suzanne_model/suzanne.png"
+    position = (0.0, 0.0, 0.0)
+}
+# Objeto 3
+object3 = {
+    obj_path = "../models_archives/cube_model/cube.obj"
+    texture_path = "../models_archives/cube_model/cube.png"
+    position = (2.0, 0.0, 0.0)
+}

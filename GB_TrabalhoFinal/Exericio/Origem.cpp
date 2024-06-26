@@ -11,9 +11,11 @@
 #include <GLFW/glfw3.h>
 
 // GLM.
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 // SHADER.
 #include "Shader.h"
@@ -24,16 +26,15 @@
 // Camera.
 #include "Camera.h"
 
+#include <libconfig.h++>
+
 // STB_IMAGE.
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 // USING.
 using namespace std;
-
-// Definições da janela.
-const GLuint WIDTH = 1000, HEIGHT = 1000;
-const char* WINDOW_TITLE = "Trabalho Final - GB (Igor Bartmann e Lucas)";
+using namespace libconfig;
 
 // Variáveis auxiliares.
 Camera camera;
@@ -95,7 +96,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 // Função para carregar um arquivo obj.
-int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
+int load_simple_obj(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0, 0.0, 1.0))
 {
 	vector <glm::vec3> vertices;
 	vector <GLuint> indices;
@@ -230,7 +231,7 @@ int loadSimpleOBJ(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.0,
 	return VAO;
 }
 
-GLuint loadTexture(string filePath)
+GLuint load_texture(string filePath)
 {
 	GLuint texId;
 
@@ -263,7 +264,7 @@ GLuint loadTexture(string filePath)
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		cout << "Failed to load texture" << endl;
 	}
 
 	// Limpa o espaço armazenado.
@@ -275,9 +276,58 @@ GLuint loadTexture(string filePath)
 	return texId;
 }
 
+void read_config(Config &cfg, const string &filename) {
+    try {
+        cfg.readFile(filename.c_str());
+    } catch(const FileIOException &fioex) {
+        cerr << "I/O error while reading file." << endl;
+        exit(EXIT_FAILURE);
+    } catch(const ParseException &pex) {
+        cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+                  << " - " << pex.getError() << endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
 // Função principal do programa.
 int main()
 {
+	Config cfg;
+	read_config(cfg, "config.txt");
+
+	// Window
+	GLint window_width = cfg.lookup("window_width");
+	GLint window_height = cfg.lookup("window_height");
+	const char* window_title = cfg.lookup("window_title");
+
+	// Camera
+	fov = cfg.lookup("fov");
+
+	// Shaders
+	const char * vertex_shader_path = cfg.lookup("vertex_shader_path");
+	const char * fragment_shader_path = cfg.lookup("fragment_shader_path");
+
+	// Object 1
+	const Setting& cfg_object1 = cfg.lookup("object1");
+	const char* obj1_obj_path = cfg_object1.lookup("obj_path");
+	const char* obj1_texture = cfg_object1.lookup("texture_path");
+	const libconfig::Setting& obj1_position_cfg = cfg_object1.lookup("position");
+	glm::vec3 obj1_position((float)obj1_position_cfg[0], (float)obj1_position_cfg[1], (float)obj1_position_cfg[2]);
+
+	// Object 2
+	const Setting& cfg_object2 = cfg.lookup("object2");
+	const char* obj2_obj_path = cfg_object2.lookup("obj_path");
+	const char* obj2_texture = cfg_object2.lookup("texture_path");
+	const libconfig::Setting& obj2_position_cfg = cfg_object2.lookup("position");
+	glm::vec3 obj2_position((float)obj2_position_cfg[0], (float)obj2_position_cfg[1], (float)obj2_position_cfg[2]);
+
+	// Object 3
+	const Setting& cfg_object3 = cfg.lookup("object3");
+	const char* obj3_obj_path = cfg_object3.lookup("obj_path");
+	const char* obj3_texture = cfg_object3.lookup("texture_path");
+	const libconfig::Setting& obj3_position_cfg = cfg_object3.lookup("position");
+	glm::vec3 obj3_position((float)obj3_position_cfg[0], (float)obj3_position_cfg[1], (float)obj3_position_cfg[2]);
+
 	// Inicializar GLFW.
 	glfwInit();
 
@@ -292,7 +342,7 @@ int main()
 #endif
 
 	// Criar janela GLFW.
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, WINDOW_TITLE, nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(window_width, window_height, window_title, nullptr, nullptr);
 
 	// Vincular janela ao contexto atual.
 	glfwMakeContextCurrent(window);
@@ -307,7 +357,7 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// Definir a posição do cursor.
-	glfwSetCursorPos(window, ((double)WIDTH / 2), ((double)HEIGHT / 2));
+	glfwSetCursorPos(window, ((double)window_width / 2), ((double)window_height / 2));
 
 	// Desabilitar o desenho do cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -315,7 +365,7 @@ int main()
 	// GLAD: carregar todos os ponteiros das funções da OpenGL.
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		cout << "Failed to initialize GLAD" << endl;
 	}
 
 	// Obter e imprimir informações de versão.
@@ -330,22 +380,15 @@ int main()
 	glViewport(0, 0, current_width, current_height);
 
 	// Obter a configuração do Program Shader.
-	Shader shader("../shaders_archives/Shader.vs", "../shaders_archives/Shader.fs");
+	Shader shader(vertex_shader_path, fragment_shader_path);
 
 	// Vincular o program shader.
 	glUseProgram(shader.ID);
 
-	// Carregar a textura.
-	GLuint texID = loadTexture("../models_archives/cube_model/cube.png");
-
-	//// Associando o buffer de textura ao shader (será usado no fragment shader).
-	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
-
-	// Carregar a textura.
-	GLuint texID2 = loadTexture("../models_archives/suzanne_model/suzanne.png");
-
-	//// Associando o buffer de textura ao shader (será usado no fragment shader).
-	//glUniform1i(glGetUniformLocation(shader.ID, "tex_buffer"), 0);
+	// Carregar a texturas.
+	GLuint object1_texID = load_texture(obj1_texture);
+	GLuint object2_texID = load_texture(obj2_texture);
+	GLuint object3_texID = load_texture(obj3_texture);
 
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
@@ -362,16 +405,16 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// Carregar a geometria armazenada.
-	int nVertsCube1, nVertsSuzanne, nVertsCube2;
-	GLuint VAO1 = loadSimpleOBJ("../models_archives/cube_model/cube.obj", nVertsCube1, glm::vec3(1.0, 0.0, 0.0));
-	GLuint VAO2 = loadSimpleOBJ("../models_archives/suzanne_model/suzanneTriLowPoly.obj", nVertsSuzanne, glm::vec3(0.0, 1.0, 0.0));
-	GLuint VAO3 = loadSimpleOBJ("../models_archives/cube_model/cube.obj", nVertsCube2, glm::vec3(1.0, 1.0, 0.0));
+	int nVertsObj1, nVertsObj2, nVertsObj3;
+	GLuint VAO1 = load_simple_obj(obj1_obj_path, nVertsObj1, glm::vec3(1.0, 0.0, 0.0));
+	GLuint VAO2 = load_simple_obj(obj2_obj_path, nVertsObj2, glm::vec3(0.0, 1.0, 0.0));
+	GLuint VAO3 = load_simple_obj(obj3_obj_path, nVertsObj3, glm::vec3(1.0, 1.0, 0.0));
 
 	// Definir o objeto (malha) do cubo.
-	Mesh cube1, suzanne, cube2;
-	cube1.initialize(VAO1, nVertsCube1, &shader, glm::vec3(-2.0, 0.0, 0.0));
-	suzanne.initialize(VAO2, nVertsSuzanne, &shader, glm::vec3(0.0, 0.0, 0.0));
-	cube2.initialize(VAO3, nVertsCube2, &shader, glm::vec3(2.0, 0.0, 0.0));
+	Mesh object1, object2, object3;
+	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position);
+	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position);
+	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position);
 
 	//Definindo as propriedades do material da superfície
 	shader.setFloat("ka", 0.2);
@@ -406,45 +449,48 @@ int main()
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
+		// Object 1
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texID);
+		glBindTexture(GL_TEXTURE_2D, object1_texID);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall
 		shader.setFloat("q", 10.0);
-		cube1.update();
-		cube1.draw();
+		object1.update();
+		object1.draw();
 
 		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		// Object 2
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texID);
+		glBindTexture(GL_TEXTURE_2D, object2_texID);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		shader.setFloat("q", 250.0);
-		cube2.update();
-		cube2.draw();
+		object2.update();
+		object2.draw();
 
 		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		// Object 3
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texID2);
+		glBindTexture(GL_TEXTURE_2D, object3_texID);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 1);
 
 		shader.setFloat("q", 1.0);
-		suzanne.update();
-		suzanne.draw();
+		object3.update();
+		object3.draw();
 
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);

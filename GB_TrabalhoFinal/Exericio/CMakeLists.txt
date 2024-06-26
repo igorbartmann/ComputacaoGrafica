@@ -7,10 +7,12 @@ project(GB)
 # All source files
 file(GLOB SRC_FILES *.c*)
 
-# Add the GLM include directori
-include_directories(/opt/homebrew/Cellar/glm/1.0.1/include/)
+include_directories(/opt/homebrew/include)
+link_directories(/opt/homebrew/lib)
 
-add_executable(app ${SRC_FILES} ${SRC_FILES_C})
+
+# Add the executable
+add_executable(app ${SRC_FILES})
 
 # C++17 standard
 set_target_properties(app PROPERTIES
@@ -19,11 +21,11 @@ set_target_properties(app PROPERTIES
     CXX_EXTENSIONS TRUE
 )
 
-set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl -lpthread")
 
+# Find and link GLFW
 find_package(glfw3 3.3 REQUIRED)
-target_link_libraries(app glfw)
+target_link_libraries(app glfw config++)
 
+# Include directories for dependencies
 include_directories("../../dependencies/GLAD/include")
-include_directories("../../dependencies/glm/include")
-include_directories("../../dependencies/")
+# include_directories("../../dependencies/glm/include")
