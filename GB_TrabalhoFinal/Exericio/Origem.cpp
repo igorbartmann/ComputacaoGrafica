@@ -349,6 +349,18 @@ int main()
 	const float obj3_d = cfg_object3.lookup("d");
 	const int obj3_illum = cfg_object3.lookup("illum");
 
+	// Object 4
+	const Setting& cfg_object4 = cfg.lookup("object4");
+	const char* obj4_obj_path = cfg_object4.lookup("obj_path");
+	const char* obj4_texture = cfg_object4.lookup("texture_path");
+	glm::vec3 obj4_position((float)cfg_object4.lookup("position")[0], (float)cfg_object4.lookup("position")[1], (float)cfg_object4.lookup("position")[2]);
+	const float obj4_rotation = cfg_object4.lookup("rotation");
+	glm::vec3 obj4_scale((float)cfg_object4.lookup("scale")[0], (float)cfg_object4.lookup("scale")[1], (float)cfg_object4.lookup("scale")[2]);
+	const float obj4_ns = cfg_object4.lookup("Ns");
+	const float obj4_ni = cfg_object4.lookup("Ni");
+	const float obj4_d = cfg_object4.lookup("d");
+	const int obj4_illum = cfg_object4.lookup("illum");
+
 	// Inicializar GLFW.
 	glfwInit();
 
@@ -410,6 +422,7 @@ int main()
 	GLuint object1_texID = load_texture(obj1_texture);
 	GLuint object2_texID = load_texture(obj2_texture);
 	GLuint object3_texID = load_texture(obj3_texture);
+	GLuint object4_texID = load_texture(obj4_texture);
 
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
@@ -430,16 +443,18 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// Carregar a geometria armazenada.
-	int nVertsObj1, nVertsObj2, nVertsObj3;
+	int nVertsObj1, nVertsObj2, nVertsObj3, nVertsObj4;
 	GLuint VAO1 = load_simple_obj(obj1_obj_path, nVertsObj1, glm::vec3(1.0, 0.0, 0.0));
 	GLuint VAO2 = load_simple_obj(obj2_obj_path, nVertsObj2, glm::vec3(0.0, 1.0, 0.0));
 	GLuint VAO3 = load_simple_obj(obj3_obj_path, nVertsObj3, glm::vec3(1.0, 1.0, 0.0));
+	GLuint VAO4 = load_simple_obj(obj4_obj_path, nVertsObj4, glm::vec3(1.0, 1.0, 0.0));
 
 	// Definir o objeto (malha) do cubo.
-	Mesh object1, object2, object3;
+	Mesh object1, object2, object3, object4;
 	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_rotation);
 	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_rotation);
 	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_rotation);
+	object4.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, obj4_rotation);
 
 	//Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
@@ -502,7 +517,6 @@ int main()
 		shader.setFloat("d",  obj2_d);
 		shader.setFloat("illum", obj2_illum);
 
-
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object2_texID);
@@ -539,6 +553,30 @@ int main()
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		// Object 4
+		// Definição material da superficie
+		// Object 4
+		// Definição material da superficie
+		shader.setFloat("ns", obj4_ns);
+		shader.setVec3("ka", (float)cfg_object4.lookup("Ka")[0], (float)cfg_object4.lookup("Ka")[1], (float)cfg_object4.lookup("Ka")[2]);
+		shader.setVec3("ks", (float)cfg_object4.lookup("Ks")[0], (float)cfg_object4.lookup("Ks")[1], (float)cfg_object4.lookup("Ks")[2]);
+		shader.setVec3("ke", (float)cfg_object4.lookup("Ke")[0], (float)cfg_object4.lookup("Ke")[1], (float)cfg_object4.lookup("Ke")[2]);
+		shader.setFloat("ni", obj4_ni);
+		shader.setFloat("d",  obj4_d);
+		shader.setFloat("illum", obj4_illum);
+
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, object4_texID);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
+		shader.setInt("tex_buffer", 1);
+
+		object4.update();
+		object4.draw();
+
+		// Desvincunlar a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}

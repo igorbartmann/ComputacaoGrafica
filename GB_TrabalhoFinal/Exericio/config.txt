@@ -68,3 +68,20 @@ object3 = {
     d = 1.000000
     illum = 2
 }
+
+object4 = {
+    obj_path = "../models_archives/Planetas/planeta.obj"
+    texture_path = "../models_archives/Planetas/Terra.jpg"
+    position = (2.0, 2.0, -4.0)
+    translation = (0.0, 0.0, 0.0)
+    rotation = 0.0
+    scale = (1.0, 1.0, 1.0)
+    Ns = 323.999994
+    Ka = (1.000000, 1.000000, 1.000000)
+    Kd = (0.800000, 0.800000, 0.800000)
+    Ks = (0.500000, 0.500000, 0.500000)
+    Ke = (0.000000, 0.000000, 0.000000)
+    Ni = 1.450000
+    d = 1.000000
+    illum = 2
+}
