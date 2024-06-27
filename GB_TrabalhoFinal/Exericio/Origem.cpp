@@ -320,10 +320,10 @@ int main()
 	glm::vec3 obj1_position((float)cfg_object1.lookup("position")[0], (float)cfg_object1.lookup("position")[1], (float)cfg_object1.lookup("position")[2]);
 	const float obj1_rotation = cfg_object1.lookup("rotation");
 	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1], (float)cfg_object1.lookup("scale")[2]);
-	const float obj1_ka = cfg_object1.lookup("ka");
-	const float obj1_kd = cfg_object1.lookup("kd");
-	const float obj1_ks = cfg_object1.lookup("ks");
-	const float obj1_q = cfg_object1.lookup("q");
+	const float obj1_ns = cfg_object1.lookup("Ns");
+	const float obj1_ni = cfg_object1.lookup("Ni");
+	const float obj1_d = cfg_object1.lookup("d");
+	const int obj1_illum = cfg_object1.lookup("illum");
 
 	// Object 2
 	const Setting& cfg_object2 = cfg.lookup("object2");
@@ -332,10 +332,10 @@ int main()
 	glm::vec3 obj2_position((float)cfg_object2.lookup("position")[0], (float)cfg_object2.lookup("position")[1], (float)cfg_object2.lookup("position")[2]);
 	const float obj2_rotation = cfg_object2.lookup("rotation");
 	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1], (float)cfg_object2.lookup("scale")[2]);
-	const float obj2_ka = cfg_object2.lookup("ka");
-	const float obj2_kd = cfg_object2.lookup("kd");
-	const float obj2_ks = cfg_object2.lookup("ks");
-	const float obj2_q = cfg_object2.lookup("q");
+	const float obj2_ns = cfg_object2.lookup("Ns");
+	const float obj2_ni = cfg_object2.lookup("Ni");
+	const float obj2_d = cfg_object2.lookup("d");
+	const int obj2_illum = cfg_object2.lookup("illum");
 
 	// Object 3
 	const Setting& cfg_object3 = cfg.lookup("object3");
@@ -344,10 +344,10 @@ int main()
 	glm::vec3 obj3_position((float)cfg_object3.lookup("position")[0], (float)cfg_object3.lookup("position")[1], (float)cfg_object3.lookup("position")[2]);
 	const float obj3_rotation = cfg_object3.lookup("rotation");
 	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1], (float)cfg_object3.lookup("scale")[2]);
-	const float obj3_ka = cfg_object3.lookup("ka");
-	const float obj3_kd = cfg_object3.lookup("kd");
-	const float obj3_ks = cfg_object3.lookup("ks");
-	const float obj3_q = cfg_object3.lookup("q");
+	const float obj3_ns = cfg_object3.lookup("Ns");
+	const float obj3_ni = cfg_object3.lookup("Ni");
+	const float obj3_d = cfg_object3.lookup("d");
+	const int obj3_illum = cfg_object3.lookup("illum");
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -470,10 +470,13 @@ int main()
 
 		// Object 1
 		// Definição material da superficie
-		shader.setFloat("ka", obj1_ka);
-		shader.setFloat("kd", obj1_kd);
-		shader.setFloat("ks", obj1_ks);
-		shader.setFloat("q", obj1_q);
+		shader.setFloat("ns", obj1_ns);
+		shader.setVec3("ka", (float)cfg_object1.lookup("Ka")[0], (float)cfg_object1.lookup("Ka")[1], (float)cfg_object1.lookup("Ka")[2]);
+		shader.setVec3("ks", (float)cfg_object1.lookup("Ks")[0], (float)cfg_object1.lookup("Ks")[1], (float)cfg_object1.lookup("Ks")[2]);
+		shader.setVec3("ke", (float)cfg_object1.lookup("Ke")[0], (float)cfg_object1.lookup("Ke")[1], (float)cfg_object1.lookup("Ke")[2]);
+		shader.setFloat("ni", obj1_ni);
+		shader.setFloat("d",  obj1_d);
+		shader.setInt("illum", obj1_illum);
 
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
@@ -483,7 +486,6 @@ int main()
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall
-		shader.setFloat("q", 10.0);
 		object1.update();
 		object1.draw();
 
@@ -492,10 +494,14 @@ int main()
 
 		// Object 2
 		// Definição material da superficie
-		shader.setFloat("ka", obj2_ka);
-		shader.setFloat("kd", obj2_kd);
-		shader.setFloat("ks", obj2_ks);
-		shader.setFloat("q", obj2_q);
+		shader.setFloat("ns", obj2_ns);
+		shader.setVec3("ka", (float)cfg_object2.lookup("Ka")[0], (float)cfg_object2.lookup("Ka")[1], (float)cfg_object2.lookup("Ka")[2]);
+		shader.setVec3("ks", (float)cfg_object2.lookup("Ks")[0], (float)cfg_object2.lookup("Ks")[1], (float)cfg_object2.lookup("Ks")[2]);
+		shader.setVec3("ke", (float)cfg_object2.lookup("Ke")[0], (float)cfg_object2.lookup("Ke")[1], (float)cfg_object2.lookup("Ke")[2]);
+		shader.setFloat("ni", obj2_ni);
+		shader.setFloat("d",  obj2_d);
+		shader.setFloat("illum", obj2_illum);
+
 
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE0);
@@ -504,7 +510,6 @@ int main()
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		shader.setFloat("q", 250.0);
 		object2.update();
 		object2.draw();
 
@@ -513,10 +518,13 @@ int main()
 
 		// Object 3
 		// Definição material da superficie
-		shader.setFloat("ka", obj3_ka);
-		shader.setFloat("kd", obj3_kd);
-		shader.setFloat("ks", obj3_ks);
-		shader.setFloat("q", obj3_q);
+		shader.setFloat("ns", obj3_ns);
+		shader.setVec3("ka", (float)cfg_object3.lookup("Ka")[0], (float)cfg_object3.lookup("Ka")[1], (float)cfg_object3.lookup("Ka")[2]);
+		shader.setVec3("ks", (float)cfg_object3.lookup("Ks")[0], (float)cfg_object3.lookup("Ks")[1], (float)cfg_object3.lookup("Ks")[2]);
+		shader.setVec3("ke", (float)cfg_object3.lookup("Ke")[0], (float)cfg_object3.lookup("Ke")[1], (float)cfg_object3.lookup("Ke")[2]);
+		shader.setFloat("ni", obj3_ni);
+		shader.setFloat("d",  obj3_d);
+		shader.setFloat("illum", obj3_illum);
 
 		// Ativação da textura.
 		glActiveTexture(GL_TEXTURE1);
@@ -525,7 +533,6 @@ int main()
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 1);
 
-		shader.setFloat("q", 1.0);
 		object3.update();
 		object3.draw();
 
