@@ -70,8 +70,8 @@ object3 = {
 }
 
 object4 = {
-    obj_path = "../models_archives/Planetas/planeta.obj"
-    texture_path = "../models_archives/Planetas/Terra.jpg"
+    obj_path = "../models_archives/planeta_model/planeta.obj"
+    texture_path = "../models_archives/planeta_model/Terra.jpg"
     position = (0.0, 0.0, 4.0)
     translation = (0.0, 0.0, 0.0)
     rotation = 0.0
