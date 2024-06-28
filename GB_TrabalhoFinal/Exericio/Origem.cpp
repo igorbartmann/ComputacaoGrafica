@@ -464,6 +464,9 @@ int main()
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
 	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1], cfg.lookup("light_color")[2]);
 
+	float planetRotationAngle = 0.0f;
+	glm::vec3 planetTranslation(0.0f, 0.0f, 0.0f);
+
 	// Laço principal da execução.
 	while (!glfwWindowShouldClose(window))
 	{
@@ -471,8 +474,8 @@ int main()
 		glfwPollEvents();
 
 		// Limpar o buffer de cor.
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Definir a largura da linha e do ponto.
 		glLineWidth(10);
@@ -489,6 +492,10 @@ int main()
 
 		// Object 1
 		// Definição material da superficie
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, object1_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
+
 		shader.setFloat("ns", obj1_ns);
 		shader.setVec3("ka", (float)cfg_object1.lookup("Ka")[0], (float)cfg_object1.lookup("Ka")[1], (float)cfg_object1.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object1.lookup("Ks")[0], (float)cfg_object1.lookup("Ks")[1], (float)cfg_object1.lookup("Ks")[2]);
@@ -496,23 +503,21 @@ int main()
 		shader.setFloat("ni", obj1_ni);
 		shader.setFloat("d",  obj1_d);
 		shader.setInt("illum", obj1_illum);
-
-		// Ativação da textura.
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object1_texID);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall
 		object1.update();
 		object1.draw();
 
-		// Desvincular a textura.
+		// // Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Object 2
 		// Definição material da superficie
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, object2_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
+
 		shader.setFloat("ns", obj2_ns);
 		shader.setVec3("ka", (float)cfg_object2.lookup("Ka")[0], (float)cfg_object2.lookup("Ka")[1], (float)cfg_object2.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object2.lookup("Ks")[0], (float)cfg_object2.lookup("Ks")[1], (float)cfg_object2.lookup("Ks")[2]);
@@ -520,19 +525,15 @@ int main()
 		shader.setFloat("ni", obj2_ni);
 		shader.setFloat("d",  obj2_d);
 		shader.setFloat("illum", obj2_illum);
-
-		// Ativação da textura.
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object2_texID);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
 		object2.update();
 		object2.draw();
 
 		// Desvincular a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, object3_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object3_texID);
 
 		// Object 3
 		// Definição material da superficie
@@ -543,13 +544,7 @@ int main()
 		shader.setFloat("ni", obj3_ni);
 		shader.setFloat("d",  obj3_d);
 		shader.setFloat("illum", obj3_illum);
-
-		// Ativação da textura.
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, object3_texID);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
-		shader.setInt("tex_buffer", 1);
+		shader.setInt("tex_buffer", 0);
 
 		object3.update();
 		object3.draw();
@@ -559,8 +554,12 @@ int main()
 
 		// Object 4
 		// Definição material da superficie
-		// Object 4
-		// Definição material da superficie
+		// Ativação da textura.
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, object4_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object4_texID);
+
+
 		shader.setFloat("ns", obj4_ns);
 		shader.setVec3("ka", (float)cfg_object4.lookup("Ka")[0], (float)cfg_object4.lookup("Ka")[1], (float)cfg_object4.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object4.lookup("Ks")[0], (float)cfg_object4.lookup("Ks")[1], (float)cfg_object4.lookup("Ks")[2]);
@@ -569,18 +568,35 @@ int main()
 		shader.setFloat("d",  obj4_d);
 		shader.setFloat("illum", obj4_illum);
 
-		// Ativação da textura.
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, object4_texID);
-
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
-		shader.setInt("tex_buffer", 1);
+		shader.setInt("tex_buffer", 0);
 
-		object4.update();
+		// object4.update();
+
+        planetRotationAngle += 0.01f;
+        if (planetRotationAngle > 360.0f) planetRotationAngle -= 360.0f;
+
+		// Create a circular orbit
+        float orbitRadius = 10.0f;
+        planetTranslation.x = orbitRadius * cos(planetRotationAngle);
+        planetTranslation.z = orbitRadius * sin(planetRotationAngle);
+		planetTranslation.y = 3.0f;
+
+		// Create rotation and translation matrices
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(planetRotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 translation = glm::translate(glm::mat4(1.0f), planetTranslation);
+
+		// Combine rotation and translation
+        glm::mat4 planetTransform = translation * rotation;
+        float modelArray[16];
+        memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)), sizeof(float) * 16);
+        shader.setMat4("model", modelArray);
+
 		object4.draw();
 
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
+
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}
@@ -589,6 +605,7 @@ int main()
 	glDeleteVertexArrays(1, &VAO1);
 	glDeleteVertexArrays(1, &VAO2);
 	glDeleteVertexArrays(1, &VAO3);
+	glDeleteVertexArrays(1, &VAO4);
 
 	// Finalizar execução da GLFW.
 	glfwTerminate();
