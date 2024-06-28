@@ -48,27 +48,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		return;
 	}
 
-	if (key == GLFW_KEY_ESCAPE)
+	switch (key)
 	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-
-	// Movimento.
-	if (key == GLFW_KEY_W)
-	{
-		camera.moveFront();
-	}
-	else if (key == GLFW_KEY_S)
-	{
-		camera.moveBack();
-	}
-	else if (key == GLFW_KEY_A)
-	{
-		camera.moveLeft();
-	}
-	else if (key == GLFW_KEY_D)
-	{
-		camera.moveRight();
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_W:
+			camera.moveFront();
+			break;
+		case GLFW_KEY_S:
+			camera.moveBack();
+			break;
+		case GLFW_KEY_A:
+			camera.moveLeft();
+			break;
+		case GLFW_KEY_D:
+			camera.moveRight();
+			break;
+		case GLFW_KEY_SPACE:
+			camera.moveUp();
+			break;
+		case GLFW_KEY_LEFT_CONTROL:
+			camera.moveDown();
+			break;
+		default:
+			break;
 	}
 }
 

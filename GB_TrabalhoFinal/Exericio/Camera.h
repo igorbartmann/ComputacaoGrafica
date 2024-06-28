@@ -84,6 +84,15 @@ public:
 	{
 		cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
+	void moveUp()
+	{
+		cameraPosition += cameraUp * cameraSpeed;
+	}
+
+	void moveDown()
+	{
+		cameraPosition -= cameraUp * cameraSpeed;
+	}
 
 	void updateMatrixByMousePosition(double xpos, double ypos)
 	{
