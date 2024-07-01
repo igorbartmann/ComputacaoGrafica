@@ -26,6 +26,7 @@
 // Camera.
 #include "Camera.h"
 
+// Libconfig.
 #include <libconfig.h++>
 
 // STB_IMAGE.
@@ -36,9 +37,47 @@
 using namespace std;
 using namespace libconfig;
 
-// Variáveis auxiliares.
+// Variáveis para câmera.
 Camera camera;
 float fov = 1.0f;
+
+// Variáveis para movimentação dos objetos.
+int selected_object_id = 0;
+float zoom_object1 = 0, zoom_object2 = 0, zoom_object3 = 0;
+bool rotateTop = false, rotateDown = false, rotateLeft = false, rotateRight = false, rotateRightTop = false, rotateLeftDown = false, zoomIn = false, zoomOut = false;
+
+// Declaração das matrizes de cada objeto.
+// Para que não percam a posição do último movimento quando não estiverem selecionados para movimentação.
+glm::mat4 model_object1 = glm::mat4(1);
+glm::mat4 model_object2 = glm::mat4(1);
+glm::mat4 model_object3 = glm::mat4(1);
+glm::mat4 projection_object1 = glm::mat4(1);
+glm::mat4 projection_object2 = glm::mat4(1);
+glm::mat4 projection_object3 = glm::mat4(1);
+
+// Função para resetar os valores de movimentação utilizados para os objetos.
+void reset_moviment_values()
+{
+	zoom_object1 = 0;
+	zoom_object2 = 0;
+	zoom_object3 = 0;
+	zoomIn = false;
+	zoomOut = false;
+
+	rotateTop = false;
+	rotateDown = false;
+	rotateLeft = false;
+	rotateRight = false;
+	rotateRightTop = false;
+	rotateLeftDown = false;
+}
+
+// Função para alterar o objeto selecionado.
+void change_selectable_object() {
+	// Todo: pegar o valor abaixo (4) a partir do arquivo de confuguracao!
+	const int selectable_objects_number = 4; // Camera + Objeto 1 + Objeto 2 + Objeto 3 = 4 objetos! 
+	selected_object_id = (++selected_object_id) % selectable_objects_number;
+}
 
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -48,28 +87,134 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		return;
 	}
 
+	if (key == GLFW_KEY_TAB)
+	{
+		change_selectable_object();
+		reset_moviment_values();
+	}
+
 	switch (key)
 	{
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
 		case GLFW_KEY_W:
-			camera.moveFront();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveFront();
+			}
+			else {
+				rotateTop = true;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
 			break;
 		case GLFW_KEY_S:
-			camera.moveBack();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveBack();
+			}
+			else {
+				rotateTop = false;
+				rotateDown = true;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
 			break;
 		case GLFW_KEY_A:
-			camera.moveLeft();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveLeft();
+			}
+			else {
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = true;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
 			break;
 		case GLFW_KEY_D:
-			camera.moveRight();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveRight();
+			}
+			else {
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = true;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
 			break;
 		case GLFW_KEY_SPACE:
-			camera.moveUp();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveUp();
+			}
+			else {
+				// Não realiza movimentos.
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
 			break;
 		case GLFW_KEY_LEFT_CONTROL:
-			camera.moveDown();
+			if (selected_object_id == 0) // Camera
+			{
+				camera.moveDown();
+			}
+			else {
+				// Não realiza movimentos.
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = false;
+			}
+			break;
+		case GLFW_KEY_R:
+			if (selected_object_id > 0) {
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = true;
+				rotateLeftDown = false;
+			}
+			break;
+		case GLFW_KEY_E:
+			if (selected_object_id > 0) {
+				rotateTop = false;
+				rotateDown = false;
+				rotateLeft = false;
+				rotateRight = false;
+				rotateRightTop = false;
+				rotateLeftDown = true;
+			}
+			break;
+		case GLFW_KEY_I:
+			if (selected_object_id > 0) {
+				zoomIn = true;
+				zoomOut = false;
+			}
+			break;
+		case GLFW_KEY_O:
+			if (selected_object_id > 0) {
+				zoomIn = false;
+				zoomOut = true;
+			}
 			break;
 		default:
 			break;
@@ -235,6 +380,7 @@ int load_simple_obj(string filepath, int& nVerts, glm::vec3 color = glm::vec3(1.
 	return VAO;
 }
 
+// Função para carregar uma textura.
 GLuint load_texture(string filePath)
 {
 	GLuint texId;
@@ -280,17 +426,74 @@ GLuint load_texture(string filePath)
 	return texId;
 }
 
+// Função para ler um arquivo de configuração.
 void read_config(Config &cfg, const string &filename) {
     try {
         cfg.readFile(filename.c_str());
-    } catch(const FileIOException &fioex) {
+    } 
+	catch(const FileIOException &fioex) {
         cerr << "I/O error while reading file." << endl;
         exit(EXIT_FAILURE);
-    } catch(const ParseException &pex) {
-        cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
-                  << " - " << pex.getError() << endl;
+    } 
+	catch(const ParseException &pex) {
+        cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
         exit(EXIT_FAILURE);
     }
+}
+
+// Função para atualizar os valores das matrizes modelo e projeção do objeto para movimentação.
+void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& projection, float& zoom) {
+	if (object_id != selected_object_id) {
+		return;
+	}
+
+	if (rotateTop)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(1, 0, 0));
+		rotateTop = false;
+	}
+	else if (rotateDown)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(-1, 0, 0));
+		rotateDown = false;
+	}
+	else if (rotateLeft)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(0, 1, 0));
+		rotateLeft = false;
+	}
+	else if (rotateRight)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(0, -1, 0));
+		rotateRight = false;
+	}
+	else if (rotateRightTop)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(-1, -1, 0));
+		rotateRightTop = false;
+	}
+	else if (rotateLeftDown)
+	{
+		model = glm::rotate(model, 45.0f, glm::vec3(1, 1, 0));
+		rotateLeftDown = false;
+	}
+
+	if (zoomIn || zoomOut)
+	{
+		projection = glm::mat4(1);
+		if (zoomIn)
+		{
+			zoom = zoom >= 0.7f ? zoom : zoom + 0.2f;
+			zoomIn = false;
+		}
+		else // zoomOut
+		{
+			zoom = zoom <= -0.7f ? zoom : zoom - 0.2f;
+			zoomOut = false;
+		}
+
+		projection = glm::scale(projection, glm::vec3((projection[0][0] + zoom) / 2, (projection[1][1] + zoom) / 2, (projection[2][2] + zoom) / 2));
+	}
 }
 
 // Função principal do programa.
@@ -430,9 +633,7 @@ int main()
 
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
-
 	camera.setCameraPosition(camera_position);
-
 	camera.setCameraProjection(camera_view_x, camera_view_y, camera_view_z);
 
 	// Matriz de visualização (posição e orientação da câmera).
@@ -453,7 +654,7 @@ int main()
 	GLuint VAO3 = load_simple_obj(obj3_obj_path, nVertsObj3, glm::vec3(1.0, 1.0, 0.0));
 	GLuint VAO4 = load_simple_obj(obj4_obj_path, nVertsObj4, glm::vec3(1.0, 1.0, 0.0));
 
-	// Definir o objeto (malha) do cubo.
+	// Definir a malha dos objetos.
 	Mesh object1, object2, object3, object4;
 	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_rotation);
 	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_rotation);
@@ -486,112 +687,141 @@ int main()
 		glm::mat4 cameraView = camera.getCameraView();
 		shader.setMat4("view", glm::value_ptr(cameraView));
 
-		// Atualizar o shader com a posição da câmera
+		// Atualizar o shader com a posição da câmera.
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-		// Object 1
-		// Definição material da superficie
+		// ### Renderização do Objeto 1 ###
+		// Atualização das matrizes de modelo e projeção.
+		update_object_matrix_to_move(1, model_object1, projection_object1, zoom_object1);
+		shader.setMat4("model", glm::value_ptr(model_object1));
+		shader.setMat4("projection", glm::value_ptr(projection_object1));
+
+		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object1_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
-
+		
+		// Setando valores de iluminação para o shader.
 		shader.setFloat("ns", obj1_ns);
 		shader.setVec3("ka", (float)cfg_object1.lookup("Ka")[0], (float)cfg_object1.lookup("Ka")[1], (float)cfg_object1.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object1.lookup("Ks")[0], (float)cfg_object1.lookup("Ks")[1], (float)cfg_object1.lookup("Ks")[2]);
 		shader.setVec3("ke", (float)cfg_object1.lookup("Ke")[0], (float)cfg_object1.lookup("Ke")[1], (float)cfg_object1.lookup("Ke")[2]);
 		shader.setFloat("ni", obj1_ni);
-		shader.setFloat("d",  obj1_d);
+		shader.setFloat("d", obj1_d);
 		shader.setInt("illum", obj1_illum);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		// Chamada de desenho - drawcall
-		object1.update();
+		// Chamada de desenho - drawcall.
+		object1.update(model_object1);
 		object1.draw();
 
-		// // Desvincular a textura.
+		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		// Object 2
-		// Definição material da superficie
+		// ### Renderização do Objeto 2 ###
+		// Atualização das matrizes de modelo e projeção.
+		update_object_matrix_to_move(2, model_object2, projection_object2, zoom_object2);
+		shader.setMat4("model", glm::value_ptr(model_object2));
+		shader.setMat4("projection", glm::value_ptr(projection_object2));
+
+		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object2_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
-
+		
+		// Setando valores de iluminação para o shader. 
 		shader.setFloat("ns", obj2_ns);
 		shader.setVec3("ka", (float)cfg_object2.lookup("Ka")[0], (float)cfg_object2.lookup("Ka")[1], (float)cfg_object2.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object2.lookup("Ks")[0], (float)cfg_object2.lookup("Ks")[1], (float)cfg_object2.lookup("Ks")[2]);
 		shader.setVec3("ke", (float)cfg_object2.lookup("Ke")[0], (float)cfg_object2.lookup("Ke")[1], (float)cfg_object2.lookup("Ke")[2]);
 		shader.setFloat("ni", obj2_ni);
-		shader.setFloat("d",  obj2_d);
+		shader.setFloat("d", obj2_d);
 		shader.setFloat("illum", obj2_illum);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		object2.update();
+		// Chamada de desenho. - drawcall.
+		object2.update(model_object2);
 		object2.draw();
 
 		// Desvincular a textura.
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// ### Renderização do Objeto 3 ###
+		// Atualização das matrizes de modelo e projeção.
+		update_object_matrix_to_move(3, model_object3, projection_object3, zoom_object3);
+		shader.setMat4("model", glm::value_ptr(model_object3));
+		shader.setMat4("projection", glm::value_ptr(projection_object3));
+
+		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object3_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object3_texID);
 
-		// Object 3
-		// Definição material da superficie
+		// Setando os valores de iluminação para o shader.
 		shader.setFloat("ns", obj3_ns);
 		shader.setVec3("ka", (float)cfg_object3.lookup("Ka")[0], (float)cfg_object3.lookup("Ka")[1], (float)cfg_object3.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object3.lookup("Ks")[0], (float)cfg_object3.lookup("Ks")[1], (float)cfg_object3.lookup("Ks")[2]);
 		shader.setVec3("ke", (float)cfg_object3.lookup("Ke")[0], (float)cfg_object3.lookup("Ke")[1], (float)cfg_object3.lookup("Ke")[2]);
 		shader.setFloat("ni", obj3_ni);
-		shader.setFloat("d",  obj3_d);
+		shader.setFloat("d", obj3_d);
 		shader.setFloat("illum", obj3_illum);
+
+		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		object3.update();
+		// Chamada de desenho - drawcall.
+		object3.update(model_object3);
 		object3.draw();
 
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		// Object 4
-		// Definição material da superficie
-		// Ativação da textura.
+		// ### Renderização do Objeto 4 ###
+		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object4_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object4_texID);
 
-
+		// Setando os valores de iluminação para o shader.
 		shader.setFloat("ns", obj4_ns);
 		shader.setVec3("ka", (float)cfg_object4.lookup("Ka")[0], (float)cfg_object4.lookup("Ka")[1], (float)cfg_object4.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object4.lookup("Ks")[0], (float)cfg_object4.lookup("Ks")[1], (float)cfg_object4.lookup("Ks")[2]);
 		shader.setVec3("ke", (float)cfg_object4.lookup("Ke")[0], (float)cfg_object4.lookup("Ke")[1], (float)cfg_object4.lookup("Ke")[2]);
 		shader.setFloat("ni", obj4_ni);
-		shader.setFloat("d",  obj4_d);
+		shader.setFloat("d", obj4_d);
 		shader.setFloat("illum", obj4_illum);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		// object4.update();
+		// Calculando ângulo de rotação do objeto.
+		planetRotationAngle += 0.01f;
+		if (planetRotationAngle > 360.0f) {
+			planetRotationAngle -= 360.0f;
+		}
 
-        planetRotationAngle += 0.01f;
-        if (planetRotationAngle > 360.0f) planetRotationAngle -= 360.0f;
-
-		// Create a circular orbit
-        float orbitRadius = 10.0f;
-        planetTranslation.x = orbitRadius * cos(planetRotationAngle);
-        planetTranslation.z = orbitRadius * sin(planetRotationAngle);
+		// Criação de uma órbita circular.
+		float orbitRadius = 10.0f;
+		planetTranslation.x = orbitRadius * cos(planetRotationAngle);
+		planetTranslation.z = orbitRadius * sin(planetRotationAngle);
 		planetTranslation.y = 3.0f;
 
-		// Create rotation and translation matrices
-        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(planetRotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 translation = glm::translate(glm::mat4(1.0f), planetTranslation);
+		// Criando matrizes de Rotação e Transalação.
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(planetRotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 translation = glm::translate(glm::mat4(1.0f), planetTranslation);
 
-		// Combine rotation and translation
-        glm::mat4 planetTransform = translation * rotation;
-        float modelArray[16];
-        memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)), sizeof(float) * 16);
-        shader.setMat4("model", modelArray);
+		// Aplicando a transformação a partir da translação e rotação.
+		glm::mat4 planetTransform = translation * rotation;
+		float modelArray[16];
+		memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)), sizeof(float) * 16);
+		shader.setMat4("model", modelArray);
 
+		// Chamada de desenho - drawcall.
 		object4.draw();
 
 		// Desvincunlar a textura.
