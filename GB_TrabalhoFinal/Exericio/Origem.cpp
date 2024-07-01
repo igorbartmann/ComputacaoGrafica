@@ -75,7 +75,7 @@ void reset_moviment_values()
 // Função para alterar o objeto selecionado.
 void change_selectable_object() {
 	// Todo: pegar o valor abaixo (4) a partir do arquivo de confuguracao!
-	const int selectable_objects_number = 4; // Camera + Objeto 1 + Objeto 2 + Objeto 3 = 4 objetos! 
+	const int selectable_objects_number = 4; // Camera + Objeto 1 + Objeto 2 + Objeto 3 = 4 objetos!
 	selected_object_id = (++selected_object_id) % selectable_objects_number;
 }
 
@@ -430,11 +430,11 @@ GLuint load_texture(string filePath)
 void read_config(Config &cfg, const string &filename) {
     try {
         cfg.readFile(filename.c_str());
-    } 
+    }
 	catch(const FileIOException &fioex) {
         cerr << "I/O error while reading file." << endl;
         exit(EXIT_FAILURE);
-    } 
+    }
 	catch(const ParseException &pex) {
         cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
         exit(EXIT_FAILURE);
@@ -695,13 +695,13 @@ int main()
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(1, model_object1, projection_object1, zoom_object1);
 		shader.setMat4("model", glm::value_ptr(model_object1));
-		shader.setMat4("projection", glm::value_ptr(projection_object1));
+		shader.setMat4("position", glm::value_ptr(projection_object1));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object1_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
-		
+
 		// Setando valores de iluminação para o shader.
 		shader.setFloat("ns", obj1_ns);
 		shader.setVec3("ka", (float)cfg_object1.lookup("Ka")[0], (float)cfg_object1.lookup("Ka")[1], (float)cfg_object1.lookup("Ka")[2]);
@@ -725,14 +725,14 @@ int main()
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(2, model_object2, projection_object2, zoom_object2);
 		shader.setMat4("model", glm::value_ptr(model_object2));
-		shader.setMat4("projection", glm::value_ptr(projection_object2));
+		shader.setMat4("position", glm::value_ptr(projection_object2));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object2_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
-		
-		// Setando valores de iluminação para o shader. 
+
+		// Setando valores de iluminação para o shader.
 		shader.setFloat("ns", obj2_ns);
 		shader.setVec3("ka", (float)cfg_object2.lookup("Ka")[0], (float)cfg_object2.lookup("Ka")[1], (float)cfg_object2.lookup("Ka")[2]);
 		shader.setVec3("ks", (float)cfg_object2.lookup("Ks")[0], (float)cfg_object2.lookup("Ks")[1], (float)cfg_object2.lookup("Ks")[2]);
@@ -755,7 +755,7 @@ int main()
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(3, model_object3, projection_object3, zoom_object3);
 		shader.setMat4("model", glm::value_ptr(model_object3));
-		shader.setMat4("projection", glm::value_ptr(projection_object3));
+		shader.setMat4("position", glm::value_ptr(projection_object3));
 
 		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
