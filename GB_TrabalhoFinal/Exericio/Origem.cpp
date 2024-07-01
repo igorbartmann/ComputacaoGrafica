@@ -1,4 +1,5 @@
 // Default libs C++.
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -441,6 +442,96 @@ void read_config(Config &cfg, const string &filename) {
     }
 }
 
+// Função utilitária para analisar o arquivo OBJ e obter o caminho completo do arquivo MTL
+std::string getMTLFilePath(const std::string& objFilePath) {
+	std::ifstream objFile(objFilePath);
+	std::string line;
+	std::string mtlFilePath;
+
+	if (!objFile.is_open()) {
+		std::cerr << "Falha ao abrir o arquivo OBJ: " << objFilePath << std::endl;
+		return "";
+	}
+
+	while (std::getline(objFile, line)) {
+		std::istringstream iss(line);
+		std::string word;
+		iss >> word;
+		if (word == "mtllib") {
+			iss >> mtlFilePath;
+			break;
+		}
+	}
+
+	objFile.close();
+
+	// Extrai o diretório do caminho relativo do arquivo OBJ
+	std::filesystem::path objPath(objFilePath);
+	std::filesystem::path objDirectory = objPath.parent_path();
+
+	// Constrói o caminho completo para o arquivo MTL
+    std::filesystem::path fullMtlPath = objDirectory / mtlFilePath;
+
+    return fullMtlPath.string();
+}
+
+struct Material {
+    glm::vec3 Ka; // Ambient color
+    glm::vec3 Kd; // Diffuse color
+    glm::vec3 Ks; // Specular color
+    glm::vec3 Ke; // Emissive color
+    float Ns;     // Specular exponent
+    float Ni;     // Optical density
+    float d;      // Dissolve
+    int illum;    // Illumination model
+};
+
+Material parseMTL(const std::string& mtlFilePath) {
+    std::ifstream mtlFile(mtlFilePath);
+    std::string line;
+    Material material;
+
+    if (!mtlFile.is_open()) {
+        std::cerr << "Failed to open MTL file: " << mtlFilePath << std::endl;
+        return material;
+    }
+
+    while (std::getline(mtlFile, line)) {
+        std::istringstream iss(line);
+        std::string word;
+        iss >> word;
+        if (word == "Ka") {
+            iss >> material.Ka.r >> material.Ka.g >> material.Ka.b;
+        } else if (word == "Kd") {
+            iss >> material.Kd.r >> material.Kd.g >> material.Kd.b;
+        } else if (word == "Ks") {
+            iss >> material.Ks.r >> material.Ks.g >> material.Ks.b;
+        } else if (word == "Ke") {
+            iss >> material.Ke.r >> material.Ke.g >> material.Ke.b;
+        } else if (word == "Ni") {
+            iss >> material.Ni;
+        } else if (word == "d") {
+            iss >> material.d;
+        } else if (word == "illum") {
+            iss >> material.illum;
+        }
+    }
+
+    mtlFile.close();
+    return material;
+}
+
+void setMaterialProperties(Shader& shader, const Material& material) {
+    shader.setVec3("ka", material.Ka.r, material.Ka.g, material.Ka.b);
+    shader.setVec3("kd", material.Kd.r, material.Kd.g, material.Kd.b);
+    shader.setVec3("ks", material.Ks.r, material.Ks.g, material.Ks.b);
+    shader.setVec3("ke", material.Ke.r, material.Ke.g, material.Ke.b);
+    shader.setFloat("ns", material.Ns);
+    shader.setFloat("ni", material.Ni);
+    shader.setFloat("d", material.d);
+    shader.setInt("illum", material.illum);
+}
+
 // Função para atualizar os valores das matrizes modelo e projeção do objeto para movimentação.
 void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& projection, float& zoom) {
 	if (object_id != selected_object_id) {
@@ -527,10 +618,6 @@ int main()
 	glm::vec3 obj1_position((float)cfg_object1.lookup("position")[0], (float)cfg_object1.lookup("position")[1], (float)cfg_object1.lookup("position")[2]);
 	const float obj1_rotation = cfg_object1.lookup("rotation");
 	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1], (float)cfg_object1.lookup("scale")[2]);
-	const float obj1_ns = cfg_object1.lookup("Ns");
-	const float obj1_ni = cfg_object1.lookup("Ni");
-	const float obj1_d = cfg_object1.lookup("d");
-	const int obj1_illum = cfg_object1.lookup("illum");
 
 	// Object 2
 	const Setting& cfg_object2 = cfg.lookup("object2");
@@ -539,10 +626,6 @@ int main()
 	glm::vec3 obj2_position((float)cfg_object2.lookup("position")[0], (float)cfg_object2.lookup("position")[1], (float)cfg_object2.lookup("position")[2]);
 	const float obj2_rotation = cfg_object2.lookup("rotation");
 	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1], (float)cfg_object2.lookup("scale")[2]);
-	const float obj2_ns = cfg_object2.lookup("Ns");
-	const float obj2_ni = cfg_object2.lookup("Ni");
-	const float obj2_d = cfg_object2.lookup("d");
-	const int obj2_illum = cfg_object2.lookup("illum");
 
 	// Object 3
 	const Setting& cfg_object3 = cfg.lookup("object3");
@@ -551,10 +634,6 @@ int main()
 	glm::vec3 obj3_position((float)cfg_object3.lookup("position")[0], (float)cfg_object3.lookup("position")[1], (float)cfg_object3.lookup("position")[2]);
 	const float obj3_rotation = cfg_object3.lookup("rotation");
 	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1], (float)cfg_object3.lookup("scale")[2]);
-	const float obj3_ns = cfg_object3.lookup("Ns");
-	const float obj3_ni = cfg_object3.lookup("Ni");
-	const float obj3_d = cfg_object3.lookup("d");
-	const int obj3_illum = cfg_object3.lookup("illum");
 
 	// Object 4
 	const Setting& cfg_object4 = cfg.lookup("object4");
@@ -563,10 +642,6 @@ int main()
 	glm::vec3 obj4_position((float)cfg_object4.lookup("position")[0], (float)cfg_object4.lookup("position")[1], (float)cfg_object4.lookup("position")[2]);
 	const float obj4_rotation = cfg_object4.lookup("rotation");
 	glm::vec3 obj4_scale((float)cfg_object4.lookup("scale")[0], (float)cfg_object4.lookup("scale")[1], (float)cfg_object4.lookup("scale")[2]);
-	const float obj4_ns = cfg_object4.lookup("Ns");
-	const float obj4_ni = cfg_object4.lookup("Ni");
-	const float obj4_d = cfg_object4.lookup("d");
-	const int obj4_illum = cfg_object4.lookup("illum");
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -661,6 +736,12 @@ int main()
 	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_rotation);
 	object4.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, obj4_rotation);
 
+	// Definiar material dos objetos
+    Material obj1_material = parseMTL(getMTLFilePath(obj1_obj_path));
+	Material obj2_material = parseMTL(getMTLFilePath(obj2_obj_path));
+	Material obj3_material = parseMTL(getMTLFilePath(obj3_obj_path));
+	Material obj4_material = parseMTL(getMTLFilePath(obj4_obj_path));
+
 	//Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
 	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1], cfg.lookup("light_color")[2]);
@@ -703,13 +784,7 @@ int main()
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
 
 		// Setando valores de iluminação para o shader.
-		shader.setFloat("ns", obj1_ns);
-		shader.setVec3("ka", (float)cfg_object1.lookup("Ka")[0], (float)cfg_object1.lookup("Ka")[1], (float)cfg_object1.lookup("Ka")[2]);
-		shader.setVec3("ks", (float)cfg_object1.lookup("Ks")[0], (float)cfg_object1.lookup("Ks")[1], (float)cfg_object1.lookup("Ks")[2]);
-		shader.setVec3("ke", (float)cfg_object1.lookup("Ke")[0], (float)cfg_object1.lookup("Ke")[1], (float)cfg_object1.lookup("Ke")[2]);
-		shader.setFloat("ni", obj1_ni);
-		shader.setFloat("d", obj1_d);
-		shader.setInt("illum", obj1_illum);
+		setMaterialProperties(shader, obj1_material);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
@@ -733,13 +808,7 @@ int main()
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
 
 		// Setando valores de iluminação para o shader.
-		shader.setFloat("ns", obj2_ns);
-		shader.setVec3("ka", (float)cfg_object2.lookup("Ka")[0], (float)cfg_object2.lookup("Ka")[1], (float)cfg_object2.lookup("Ka")[2]);
-		shader.setVec3("ks", (float)cfg_object2.lookup("Ks")[0], (float)cfg_object2.lookup("Ks")[1], (float)cfg_object2.lookup("Ks")[2]);
-		shader.setVec3("ke", (float)cfg_object2.lookup("Ke")[0], (float)cfg_object2.lookup("Ke")[1], (float)cfg_object2.lookup("Ke")[2]);
-		shader.setFloat("ni", obj2_ni);
-		shader.setFloat("d", obj2_d);
-		shader.setFloat("illum", obj2_illum);
+		setMaterialProperties(shader, obj2_material);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
@@ -763,13 +832,7 @@ int main()
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object3_texID);
 
 		// Setando os valores de iluminação para o shader.
-		shader.setFloat("ns", obj3_ns);
-		shader.setVec3("ka", (float)cfg_object3.lookup("Ka")[0], (float)cfg_object3.lookup("Ka")[1], (float)cfg_object3.lookup("Ka")[2]);
-		shader.setVec3("ks", (float)cfg_object3.lookup("Ks")[0], (float)cfg_object3.lookup("Ks")[1], (float)cfg_object3.lookup("Ks")[2]);
-		shader.setVec3("ke", (float)cfg_object3.lookup("Ke")[0], (float)cfg_object3.lookup("Ke")[1], (float)cfg_object3.lookup("Ke")[2]);
-		shader.setFloat("ni", obj3_ni);
-		shader.setFloat("d", obj3_d);
-		shader.setFloat("illum", obj3_illum);
+		setMaterialProperties(shader, obj3_material);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
@@ -788,13 +851,7 @@ int main()
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object4_texID);
 
 		// Setando os valores de iluminação para o shader.
-		shader.setFloat("ns", obj4_ns);
-		shader.setVec3("ka", (float)cfg_object4.lookup("Ka")[0], (float)cfg_object4.lookup("Ka")[1], (float)cfg_object4.lookup("Ka")[2]);
-		shader.setVec3("ks", (float)cfg_object4.lookup("Ks")[0], (float)cfg_object4.lookup("Ks")[1], (float)cfg_object4.lookup("Ks")[2]);
-		shader.setVec3("ke", (float)cfg_object4.lookup("Ke")[0], (float)cfg_object4.lookup("Ke")[1], (float)cfg_object4.lookup("Ke")[2]);
-		shader.setFloat("ni", obj4_ni);
-		shader.setFloat("d", obj4_d);
-		shader.setFloat("illum", obj4_illum);
+		setMaterialProperties(shader, obj4_material);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
