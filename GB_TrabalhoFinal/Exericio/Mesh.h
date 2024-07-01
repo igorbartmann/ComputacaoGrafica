@@ -14,20 +14,20 @@ public:
 	Mesh() {}
 	~Mesh() {}
 	void initialize(GLuint VAO, int nVertices, Shader* shader, glm::vec3 position = glm::vec3(0.0, 0.0, 0.0), glm::vec3 scale = glm::vec3(1.0, 1.0, 1.0), float angle = 0.0, glm::vec3 axis = glm::vec3(0.0, 0.0, 1.0));
-	void update();
+	void update(glm::mat4 model);
 	void draw();
 
 protected:
-	GLuint VAO; //Identificador do Vertex Array Object - Vértices e seus atributos
+	GLuint VAO; //Identificador do Vertex Array Object - Vï¿½rtices e seus atributos
 	int nVertices;
 
-	//Informações sobre as transformações a serem aplicadas no objeto
+	//InformaÃ§Ãµes sobre as transformaÃ§Ãµes a serem aplicadas no objeto
 	glm::vec3 position;
 	glm::vec3 scale;
 	float angle;
 	glm::vec3 axis;
 
-	//Referência (endereço) do shader
+	//ReferÃªncia (endereÃ§o) do shader
 	Shader* shader;
 };
 
