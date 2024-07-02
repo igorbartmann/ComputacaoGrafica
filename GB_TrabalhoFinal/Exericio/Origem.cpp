@@ -75,11 +75,26 @@ void reset_moviment_values() {
 	rotateLeftDown = false;
 }
 
+// Função para ler um arquivo de configuração.
+void read_config(Config& cfg, const string& filename) {
+	try {
+		cfg.readFile(filename.c_str());
+	} catch (const FileIOException& fioex) {
+		cerr << "I/O error while reading file." << endl;
+		exit(EXIT_FAILURE);
+	} catch (const ParseException& pex) {
+		cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
 // Função para alterar o objeto selecionado.
 void change_selectable_object() {
-	// Todo: pegar o valor abaixo (4) a partir do arquivo de confuguracao!
-	const int selectable_objects_number = 4;  // Camera + Objeto 1 + Objeto 2 + Objeto 3 = 4 objetos!
-	selected_object_id = (++selected_object_id) % selectable_objects_number;
+	// Lê o valor de selectable_objects_number a partir do arquivo de configuração.
+	Config cfg;
+	read_config(cfg, "config.txt");
+	int selectable_objects_number = cfg.lookup("selectable_objects_number");
+	selected_object_id = (selected_object_id + 1) % selectable_objects_number;
 }
 
 // Função para movimentação da câmera.
@@ -346,19 +361,6 @@ GLuint load_texture(string filePath) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texId;
-}
-
-// Função para ler um arquivo de configuração.
-void read_config(Config& cfg, const string& filename) {
-	try {
-		cfg.readFile(filename.c_str());
-	} catch (const FileIOException& fioex) {
-		cerr << "I/O error while reading file." << endl;
-		exit(EXIT_FAILURE);
-	} catch (const ParseException& pex) {
-		cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
-		exit(EXIT_FAILURE);
-	}
 }
 
 // Função utilitária para analisar o arquivo OBJ e obter o caminho completo do arquivo MTL

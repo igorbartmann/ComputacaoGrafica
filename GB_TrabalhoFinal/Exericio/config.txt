@@ -19,6 +19,8 @@ light_color = (1.0, 1.0, 0.0, 0.0)
 vertex_shader_path = "../shaders_archives/Shader.vs"
 fragment_shader_path = "../shaders_archives/Shader.fs"
 
+selectable_objects_number = 4
+
 # Objeto 1
 object1 = {
     obj_path = "../models_archives/cube_model/cube.obj"
