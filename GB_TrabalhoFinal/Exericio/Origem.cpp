@@ -153,25 +153,23 @@ void handle_object_movement(int key) {
 }
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-	if (action != GLFW_PRESS) {
-		return;
-	}
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		if (key == GLFW_KEY_TAB) {
+			change_selectable_object();
+			reset_moviment_values();
+			return;
+		}
 
-	if (key == GLFW_KEY_TAB) {
-		change_selectable_object();
-		reset_moviment_values();
-		return;
-	}
+		if (key == GLFW_KEY_ESCAPE) {
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			return;
+		}
 
-	if (key == GLFW_KEY_ESCAPE) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-		return;
-	}
-
-	if (selected_object_id == CAMERA_ID) {
-		handle_camera_movement(key);
-	} else {
-		handle_object_movement(key);
+		if (selected_object_id == CAMERA_ID) {
+			handle_camera_movement(key);
+		} else {
+			handle_object_movement(key);
+		}
 	}
 }
 
@@ -472,10 +470,10 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 1, 0));
 			break;
 		case ZOOM_IN:
-			zoom += 0.1f;
+			zoom += 0.5f;
 			break;
 		case ZOOM_OUT:
-			zoom -= 0.2f;
+			zoom -= 0.5f;
 			break;
 		default:
 			break;
@@ -483,8 +481,7 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 
 	// Apply zoom to the projection matrix
 	if (currentRotationState == ZOOM_IN || currentRotationState == ZOOM_OUT) {
-		projection = glm::scale(projection, glm::vec3((projection[0][0] + zoom) / 2, (projection[1][1] + zoom) / 2,
-													  (projection[2][2] + zoom) / 2));
+		projection = glm::perspective(glm::radians(45.0f + zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 	}
 
 	// Reset the rotation state after applying the transformation
@@ -658,10 +655,12 @@ int main() {
 	glm::mat4 model_object2 = glm::mat4(1);
 	glm::mat4 model_object3 = glm::mat4(1);
 
-	glm::mat4 projection_object1 = glm::mat4(1);
-	glm::mat4 projection_object2 = glm::mat4(1);
-	glm::mat4 projection_object3 = glm::mat4(1);
+	glm::mat4 projection_object1 = camera.getCameraProjection();
+	glm::mat4 projection_object2 = camera.getCameraProjection();
+	glm::mat4 projection_object3 = camera.getCameraProjection();
+	glm::mat4 projection_object4 = camera.getCameraProjection();
 
+	// glm::mat4 projection =
 	// Laço principal da execução.
 	while (!glfwWindowShouldClose(window)) {
 		// Checar e tratar eventos de input.
@@ -688,7 +687,7 @@ int main() {
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(1, model_object1, projection_object1, zoom_object1);
 		shader.setMat4("model", glm::value_ptr(model_object1));
-		shader.setMat4("position", glm::value_ptr(projection_object1));
+		shader.setMat4("projection", glm::value_ptr(projection_object1));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
@@ -712,7 +711,7 @@ int main() {
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(2, model_object2, projection_object2, zoom_object2);
 		shader.setMat4("model", glm::value_ptr(model_object2));
-		shader.setMat4("position", glm::value_ptr(projection_object2));
+		shader.setMat4("projection", glm::value_ptr(projection_object2));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
@@ -736,7 +735,7 @@ int main() {
 		// Atualização das matrizes de modelo e projeção.
 		update_object_matrix_to_move(3, model_object3, projection_object3, zoom_object3);
 		shader.setMat4("model", glm::value_ptr(model_object3));
-		shader.setMat4("position", glm::value_ptr(projection_object3));
+		shader.setMat4("projection", glm::value_ptr(projection_object3));
 
 		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
@@ -791,6 +790,7 @@ int main() {
 		memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)),
 			   sizeof(float) * 16);
 		shader.setMat4("model", modelArray);
+		shader.setMat4("projection", glm::value_ptr(projection_object4));
 
 		// Chamada de desenho - drawcall.
 		object4.draw();
