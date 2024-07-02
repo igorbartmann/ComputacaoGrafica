@@ -46,33 +46,36 @@ float fov = 1.0f;
 // Variáveis para movimentação dos objetos.
 int selected_object_id = 0;
 float zoom_object1 = 0, zoom_object2 = 0, zoom_object3 = 0;
-bool rotateTop = false, rotateDown = false, rotateLeft = false, rotateRight = false, rotateRightTop = false,
-	 rotateLeftDown = false, zoomIn = false, zoomOut = false;
+bool rotateTop = false;
+bool rotateDown = false;
+bool rotateLeft = false;
+bool rotateRight = false;
+bool rotateRightTop = false;
+bool rotateLeftDown = false;
+bool zoomIn = false;
+bool zoomOut = false;
 const int CAMERA_ID = 0;
 
-// Declaração das matrizes de cada objeto.
-// Para que não percam a posição do último movimento quando não estiverem selecionados para movimentação.
-glm::mat4 model_object1 = glm::mat4(1);
-glm::mat4 model_object2 = glm::mat4(1);
-glm::mat4 model_object3 = glm::mat4(1);
-glm::mat4 projection_object1 = glm::mat4(1);
-glm::mat4 projection_object2 = glm::mat4(1);
-glm::mat4 projection_object3 = glm::mat4(1);
+enum RotationState {
+	ROTATE_NONE,
+	ROTATE_TOP,
+	ROTATE_DOWN,
+	ROTATE_LEFT,
+	ROTATE_RIGHT,
+	ROTATE_RIGHT_TOP,
+	ROTATE_LEFT_DOWN,
+	ZOOM_IN,
+	ZOOM_OUT
+};
+
+RotationState currentRotationState = ROTATE_NONE;
 
 // Função para resetar os valores de movimentação utilizados para os objetos.
 void reset_moviment_values() {
 	zoom_object1 = 0;
 	zoom_object2 = 0;
 	zoom_object3 = 0;
-	zoomIn = false;
-	zoomOut = false;
-
-	rotateTop = false;
-	rotateDown = false;
-	rotateLeft = false;
-	rotateRight = false;
-	rotateRightTop = false;
-	rotateLeftDown = false;
+	currentRotationState = ROTATE_NONE;
 }
 
 // Função para ler um arquivo de configuração.
@@ -125,39 +128,36 @@ void handle_camera_movement(int key) {
 
 // Função para movimentação de outros objetos
 void handle_object_movement(int key) {
-	rotateTop = rotateDown = rotateLeft = rotateRight = rotateRightTop = rotateLeftDown = false;
-	zoomIn = zoomOut = false;
-
+	currentRotationState = ROTATE_NONE;	 // Reset the state
 	switch (key) {
 		case GLFW_KEY_W:
-			rotateTop = true;
+			currentRotationState = ROTATE_TOP;
 			break;
 		case GLFW_KEY_S:
-			rotateDown = true;
+			currentRotationState = ROTATE_DOWN;
 			break;
 		case GLFW_KEY_A:
-			rotateLeft = true;
+			currentRotationState = ROTATE_LEFT;
 			break;
 		case GLFW_KEY_D:
-			rotateRight = true;
+			currentRotationState = ROTATE_RIGHT;
 			break;
 		case GLFW_KEY_R:
-			rotateRightTop = true;
+			currentRotationState = ROTATE_RIGHT_TOP;
 			break;
 		case GLFW_KEY_E:
-			rotateLeftDown = true;
+			currentRotationState = ROTATE_LEFT_DOWN;
 			break;
 		case GLFW_KEY_I:
-			zoomIn = true;
+			currentRotationState = ZOOM_IN;
 			break;
 		case GLFW_KEY_O:
-			zoomOut = true;
+			currentRotationState = ZOOM_OUT;
 			break;
 		default:
 			break;
 	}
 }
-
 // Função para configurar callback de entrada via teclado.
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
 	if (action != GLFW_PRESS) {
@@ -459,40 +459,43 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 		return;
 	}
 
-	if (rotateTop) {
-		model = glm::rotate(model, 45.0f, glm::vec3(1, 0, 0));
-		rotateTop = false;
-	} else if (rotateDown) {
-		model = glm::rotate(model, 45.0f, glm::vec3(-1, 0, 0));
-		rotateDown = false;
-	} else if (rotateLeft) {
-		model = glm::rotate(model, 45.0f, glm::vec3(0, 1, 0));
-		rotateLeft = false;
-	} else if (rotateRight) {
-		model = glm::rotate(model, 45.0f, glm::vec3(0, -1, 0));
-		rotateRight = false;
-	} else if (rotateRightTop) {
-		model = glm::rotate(model, 45.0f, glm::vec3(-1, -1, 0));
-		rotateRightTop = false;
-	} else if (rotateLeftDown) {
-		model = glm::rotate(model, 45.0f, glm::vec3(1, 1, 0));
-		rotateLeftDown = false;
+	switch (currentRotationState) {
+		case ROTATE_TOP:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 0, 0));
+			break;
+		case ROTATE_DOWN:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(-1, 0, 0));
+			break;
+		case ROTATE_LEFT:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 1, 0));
+			break;
+		case ROTATE_RIGHT:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, -1, 0));
+			break;
+		case ROTATE_RIGHT_TOP:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(-1, -1, 0));
+			break;
+		case ROTATE_LEFT_DOWN:
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1, 1, 0));
+			break;
+		case ZOOM_IN:
+			zoom += 0.1f;
+			break;
+		case ZOOM_OUT:
+			zoom -= 0.2f;
+			break;
+		default:
+			break;
 	}
 
-	if (zoomIn || zoomOut) {
-		projection = glm::mat4(1);
-		if (zoomIn) {
-			zoom = zoom >= 0.7f ? zoom : zoom + 0.2f;
-			zoomIn = false;
-		} else	// zoomOut
-		{
-			zoom = zoom <= -0.7f ? zoom : zoom - 0.2f;
-			zoomOut = false;
-		}
-
+	// Apply zoom to the projection matrix
+	if (currentRotationState == ZOOM_IN || currentRotationState == ZOOM_OUT) {
 		projection = glm::scale(projection, glm::vec3((projection[0][0] + zoom) / 2, (projection[1][1] + zoom) / 2,
 													  (projection[2][2] + zoom) / 2));
 	}
+
+	// Reset the rotation state after applying the transformation
+	currentRotationState = ROTATE_NONE;
 }
 
 // Função principal do programa.
@@ -655,6 +658,16 @@ int main() {
 
 	float planetRotationAngle = 0.0f;
 	glm::vec3 planetTranslation(0.0f, 0.0f, 0.0f);
+
+	// Declaração das matrizes de cada objeto.
+	// Para que não percam a posição do último movimento quando não estiverem selecionados para movimentação.
+	glm::mat4 model_object1 = glm::mat4(1);
+	glm::mat4 model_object2 = glm::mat4(1);
+	glm::mat4 model_object3 = glm::mat4(1);
+
+	glm::mat4 projection_object1 = glm::mat4(1);
+	glm::mat4 projection_object2 = glm::mat4(1);
+	glm::mat4 projection_object3 = glm::mat4(1);
 
 	// Laço principal da execução.
 	while (!glfwWindowShouldClose(window)) {
