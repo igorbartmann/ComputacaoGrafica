@@ -46,14 +46,7 @@ float fov = 1.0f;
 // Variáveis para movimentação dos objetos.
 int selected_object_id = 0;
 float zoom_object1 = 0, zoom_object2 = 0, zoom_object3 = 0;
-bool rotateTop = false;
-bool rotateDown = false;
-bool rotateLeft = false;
-bool rotateRight = false;
-bool rotateRightTop = false;
-bool rotateLeftDown = false;
-bool zoomIn = false;
-bool zoomOut = false;
+
 const int CAMERA_ID = 0;
 
 enum RotationState {
