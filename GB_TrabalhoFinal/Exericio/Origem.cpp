@@ -423,11 +423,15 @@ Material parseMTL(const std::string& mtlFilePath) {
 	return material;
 }
 
-void setMaterialProperties(Shader& shader, const Material& material) {
+void setMaterialProperties(Shader& shader, const Material& material, bool isSelected) {
 	shader.setVec3("ka", material.Ka.r, material.Ka.g, material.Ka.b);
 	shader.setVec3("kd", material.Kd.r, material.Kd.g, material.Kd.b);
 	shader.setVec3("ks", material.Ks.r, material.Ks.g, material.Ks.b);
-	shader.setVec3("ke", material.Ke.r, material.Ke.g, material.Ke.b);
+	if (isSelected) {
+		shader.setVec3("ke", 0.2, 0.7, 0.0);
+	} else {
+		shader.setVec3("ke", material.Ke.r, material.Ke.g, material.Ke.b);
+	}
 	shader.setFloat("ns", material.Ns);
 	shader.setFloat("ni", material.Ni);
 	shader.setFloat("d", material.d);
@@ -435,7 +439,8 @@ void setMaterialProperties(Shader& shader, const Material& material) {
 }
 
 // Função para atualizar os valores das matrizes modelo e projeção do objeto para movimentação.
-void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& projection, float& zoom) {
+void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& projection, float& zoom,
+								  float window_width, float window_height) {
 	if (object_id != selected_object_id) {
 		return;
 	}
@@ -471,9 +476,8 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 
 	// Apply zoom to the projection matrix
 	if (currentRotationState == ZOOM_IN || currentRotationState == ZOOM_OUT) {
-		projection = glm::perspective(glm::radians(45.0f + zoom), 800.0f / 600.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f + zoom), window_width / window_height, 1.0f, 100.0f);
 	}
-
 	// Reset the rotation state after applying the transformation
 	currentRotationState = ROTATE_NONE;
 }
@@ -657,6 +661,7 @@ int main() {
 
 	// glm::mat4 projection =
 	// Laço principal da execução.
+	bool isSelected = 0;
 	while (!glfwWindowShouldClose(window)) {
 		// Checar e tratar eventos de input.
 		glfwPollEvents();
@@ -680,7 +685,8 @@ int main() {
 
 		// ### Renderização do Objeto 1 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(1, obj1_model, obj1_projection, obj1_zoom);
+		update_object_matrix_to_move(1, obj1_model, obj1_projection, obj1_zoom, (float)window_width,
+									 (float)window_height);
 		shader.setMat4("model", glm::value_ptr(obj1_model));
 		shader.setMat4("projection", glm::value_ptr(obj1_projection));
 
@@ -690,7 +696,8 @@ int main() {
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj1_texID);
 
 		// Setando valores de iluminação para o shader.
-		setMaterialProperties(shader, obj1_material);
+		isSelected = (selected_object_id == 1);
+		setMaterialProperties(shader, obj1_material, isSelected);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
@@ -704,7 +711,8 @@ int main() {
 
 		// ### Renderização do Objeto 2 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(2, obj2_model, obj2_projection, obj2_zoom);
+		update_object_matrix_to_move(2, obj2_model, obj2_projection, obj2_zoom, (float)window_width,
+									 (float)window_height);
 		shader.setMat4("model", glm::value_ptr(obj2_model));
 		shader.setMat4("projection", glm::value_ptr(obj2_projection));
 
@@ -714,8 +722,8 @@ int main() {
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj2_texID);
 
 		// Setando valores de iluminação para o shader.
-		setMaterialProperties(shader, obj2_material);
-
+		isSelected = (selected_object_id == 2);
+		setMaterialProperties(shader, obj2_material, isSelected);
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
@@ -728,7 +736,8 @@ int main() {
 
 		// ### Renderização do Objeto 3 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(3, obj3_model, obj3_projection, obj3_zoom);
+		update_object_matrix_to_move(3, obj3_model, obj3_projection, obj3_zoom, (float)window_width,
+									 (float)window_height);
 		shader.setMat4("model", glm::value_ptr(obj3_model));
 		shader.setMat4("projection", glm::value_ptr(obj3_projection));
 
@@ -738,7 +747,8 @@ int main() {
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj3_texID);
 
 		// Setando os valores de iluminação para o shader.
-		setMaterialProperties(shader, obj3_material);
+		isSelected = (selected_object_id == 3);
+		setMaterialProperties(shader, obj3_material, isSelected);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
@@ -752,7 +762,8 @@ int main() {
 
 		// ### Renderização do Objeto 4 ###
 		// Definição do material da superfície (textura).
-		update_object_matrix_to_move(4, obj4_model, obj4_projection, obj4_zoom);
+		update_object_matrix_to_move(4, obj4_model, obj4_projection, obj4_zoom, (float)window_width,
+									 (float)window_height);
 		shader.setMat4("model", glm::value_ptr(obj4_model));
 		shader.setMat4("projection", glm::value_ptr(obj4_projection));
 
@@ -761,12 +772,12 @@ int main() {
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj4_texID);
 
 		// Setando os valores de iluminação para o shader.
-		setMaterialProperties(shader, obj4_material);
+		setMaterialProperties(shader, obj4_material, false);
 
 		// Associando o buffer de textura ao shader (será usado no fragment shader).
 		shader.setInt("tex_buffer", 0);
 
-		// Calculando ângulo de rotação do objeto.
+		// Calculando ângulo de rotação do objeto
 		planetRotationAngle += 0.01f;
 		if (planetRotationAngle > 360.0f) {
 			planetRotationAngle -= 360.0f;
