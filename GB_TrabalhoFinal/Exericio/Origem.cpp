@@ -488,6 +488,32 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 	currentRotationState = ROTATE_NONE;
 }
 
+// Função para renderizar o objeto.
+void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::mat4& projection, float& zoom, GLuint texture_id, Material material) {
+	// Atualização das matrizes de modelo e projeção.
+	update_object_matrix_to_move(object.getId(), model, projection, zoom);
+	shader.setMat4("model", glm::value_ptr(model));
+	shader.setMat4("projection", glm::value_ptr(projection));
+
+	// Definição do material da superficie (textura).
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), texture_id);
+
+	// Setando valores de iluminação para o shader.
+	setMaterialProperties(shader, material);
+
+	// Associando o buffer de textura ao shader (será usado no fragment shader).
+	shader.setInt("tex_buffer", 0);
+
+	// Chamada de desenho - drawcall.
+	object.update(model);
+	object.draw();
+
+	// Desvincular a textura.
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 // Função principal do programa.
 int main() {
 	Config cfg;
@@ -630,10 +656,10 @@ int main() {
 
 	// Definir a malha dos objetos.
 	Mesh object1, object2, object3, object4;
-	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, cfg_object1.lookup("rotation"));
-	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, cfg_object2.lookup("rotation"));
-	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, cfg_object3.lookup("rotation"));
-	object4.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, cfg_object4.lookup("rotation"));
+	object1.initialize(1, VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, cfg_object1.lookup("rotation"));
+	object2.initialize(2, VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, cfg_object2.lookup("rotation"));
+	object3.initialize(3, VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, cfg_object3.lookup("rotation"));
+	object4.initialize(4, VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, cfg_object4.lookup("rotation"));
 
 	// Definiar material dos objetos
 	Material obj1_material = parseMTL(getMTLFilePath(cfg_object1.lookup("obj_path")));
@@ -683,79 +709,19 @@ int main() {
 		glm::vec3 cameraPosition = camera.getCameraPosition();
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-		// ### Renderização do Objeto 1 ###
-		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(1, model_object1, projection_object1, zoom_object1);
-		shader.setMat4("model", glm::value_ptr(model_object1));
-		shader.setMat4("projection", glm::value_ptr(projection_object1));
+		// Renderização do Objeto 1.
+		handle_object_render(shader, object1, model_object1, projection_object1, zoom_object1, object1_texID,
+							 obj1_material);
+		
+		// Renderização do Objeto 2.
+		handle_object_render(shader, object2, model_object2, projection_object2, zoom_object2, object2_texID,
+							 obj2_material);	
 
-		// Definição do material da superficie (textura).
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object1_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
+		// Renderização do Objeto 3.
+		handle_object_render(shader, object3, model_object3, projection_object3, zoom_object3, object3_texID,
+							 obj3_material);
 
-		// Setando valores de iluminação para o shader.
-		setMaterialProperties(shader, obj1_material);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
-		shader.setInt("tex_buffer", 0);
-
-		// Chamada de desenho - drawcall.
-		object1.update(model_object1);
-		object1.draw();
-
-		// Desvincular a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// ### Renderização do Objeto 2 ###
-		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(2, model_object2, projection_object2, zoom_object2);
-		shader.setMat4("model", glm::value_ptr(model_object2));
-		shader.setMat4("projection", glm::value_ptr(projection_object2));
-
-		// Definição do material da superficie (textura).
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object2_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
-
-		// Setando valores de iluminação para o shader.
-		setMaterialProperties(shader, obj2_material);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
-		shader.setInt("tex_buffer", 0);
-
-		// Chamada de desenho. - drawcall.
-		object2.update(model_object2);
-		object2.draw();
-
-		// Desvincular a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// ### Renderização do Objeto 3 ###
-		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(3, model_object3, projection_object3, zoom_object3);
-		shader.setMat4("model", glm::value_ptr(model_object3));
-		shader.setMat4("projection", glm::value_ptr(projection_object3));
-
-		// Definição do material da superfície (textura).
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object3_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object3_texID);
-
-		// Setando os valores de iluminação para o shader.
-		setMaterialProperties(shader, obj3_material);
-
-		// Associando o buffer de textura ao shader (será usado no fragment shader).
-		shader.setInt("tex_buffer", 0);
-
-		// Chamada de desenho - drawcall.
-		object3.update(model_object3);
-		object3.draw();
-
-		// Desvincunlar a textura.
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// ### Renderização do Objeto 4 ###
+		// Renderização do Objeto 4.
 		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object4_texID);

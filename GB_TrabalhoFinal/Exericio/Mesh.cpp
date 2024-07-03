@@ -1,7 +1,8 @@
 #include "Mesh.h"
 
-void Mesh::initialize(GLuint VAO, int nVertices, Shader* shader, glm::vec3 position, glm::vec3 scale, float angle, glm::vec3 axis)
+void Mesh::initialize(int id, GLuint VAO, int nVertices, Shader* shader, glm::vec3 position, glm::vec3 scale, float angle, glm::vec3 axis)
 {
+	this->id = id;
 	this->VAO = VAO;
 	this->nVertices = nVertices;
 	this->shader = shader;
@@ -9,6 +10,10 @@ void Mesh::initialize(GLuint VAO, int nVertices, Shader* shader, glm::vec3 posit
 	this->scale = scale;
 	this->angle = angle;
 	this->axis = axis;
+}
+
+int Mesh::getId() {
+	return id;
 }
 
 void Mesh::update(glm::mat4 model = glm::mat4(1))
