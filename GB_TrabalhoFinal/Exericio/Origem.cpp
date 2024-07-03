@@ -483,9 +483,11 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 }
 
 // Função para renderizar o objeto.
-void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::mat4& projection, float& zoom, GLuint texture_id, Material material) {
+void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::mat4& projection, float& zoom,
+						  GLuint texture_id, Material material, int window_width, int window_height,
+						  bool isSelected = false) {
 	// Atualização das matrizes de modelo e projeção.
-	update_object_matrix_to_move(object.getId(), model, projection, zoom);
+	update_object_matrix_to_move(object.getId(), model, projection, zoom, (float)window_width, (float)window_height);
 	shader.setMat4("model", glm::value_ptr(model));
 	shader.setMat4("projection", glm::value_ptr(projection));
 
@@ -495,7 +497,7 @@ void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::ma
 	glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), texture_id);
 
 	// Setando valores de iluminação para o shader.
-	setMaterialProperties(shader, material);
+	setMaterialProperties(shader, material, isSelected);
 
 	// Associando o buffer de textura ao shader (será usado no fragment shader).
 	shader.setInt("tex_buffer", 0);
@@ -654,10 +656,10 @@ int main() {
 
 	// Definir a malha dos objetos.
 	Mesh obj1_mesh, obj2_mesh, obj3_mesh, obj4_mesh;
-	obj1_mesh.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_config.lookup("rotation"));
-	obj2_mesh.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_config.lookup("rotation"));
-	obj3_mesh.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_config.lookup("rotation"));
-	obj4_mesh.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, obj4_config.lookup("rotation"));
+	obj1_mesh.initialize(1, VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_config.lookup("rotation"));
+	obj2_mesh.initialize(2, VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_config.lookup("rotation"));
+	obj3_mesh.initialize(3, VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_config.lookup("rotation"));
+	obj4_mesh.initialize(4, VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, obj4_config.lookup("rotation"));
 
 	// Definiar material dos objetos
 	Material obj1_material = parseMTL(getMTLFilePath(obj1_config.lookup("obj_path")));
@@ -710,21 +712,23 @@ int main() {
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		// Renderização do Objeto 1.
-		handle_object_render(shader, obj1_mesh, obj1_model, obj1_projection, obj1_zoom, obj1_texID,
-							 obj1_material);
-		
+		isSelected = (selected_object_id == 1);
+		handle_object_render(shader, obj1_mesh, obj1_model, obj1_projection, obj1_zoom, obj1_texID, obj1_material,
+							 window_width, window_height, isSelected);
+
 		// Renderização do Objeto 2.
-		handle_object_render(shader, obj2_mesh, obj2_model, obj2_projection, obj2_zoom, obj2_texID,
-							 obj2_material);	
+		isSelected = (selected_object_id == 2);
+		handle_object_render(shader, obj2_mesh, obj2_model, obj2_projection, obj2_zoom, obj2_texID, obj2_material,
+							 window_width, window_height, isSelected);
 
 		// Renderização do Objeto 3.
-		handle_object_render(shader, obj3_mesh, obj3_model, obj3_projection, obj3_zoom, obj3_texID,
-							 obj3_material);
+		isSelected = (selected_object_id == 3);
+		handle_object_render(shader, obj3_mesh, obj3_model, obj3_projection, obj3_zoom, obj3_texID, obj3_material,
+							 window_width, window_height, isSelected);
 
 		// Renderização do Objeto 4.
 		// Definição do material da superfície (textura).
-		update_object_matrix_to_move(4, obj4_model, obj4_projection, obj4_zoom, (float)window_width,
-									 (float)window_height);
+		update_object_matrix_to_move(4, obj4_model, obj4_projection, obj4_zoom, window_width, window_height);
 		shader.setMat4("model", glm::value_ptr(obj4_model));
 		shader.setMat4("projection", glm::value_ptr(obj4_projection));
 
