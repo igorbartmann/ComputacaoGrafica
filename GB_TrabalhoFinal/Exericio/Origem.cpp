@@ -62,9 +62,6 @@ enum RotationState {
 
 RotationState currentRotationState = ROTATE_NONE;
 
-// Função para resetar os valores de movimentação utilizados para os objetos.
-void reset_moviment_values() { currentRotationState = ROTATE_NONE; }
-
 // Função para ler um arquivo de configuração.
 void read_config(Config& cfg, const string& filename) {
 	try {
@@ -150,7 +147,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 		if (key == GLFW_KEY_TAB) {
 			change_selectable_object();
-			reset_moviment_values();
 			return;
 		}
 
