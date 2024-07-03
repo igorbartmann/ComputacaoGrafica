@@ -507,36 +507,36 @@ int main() {
 	const char* fragment_shader_path = cfg.lookup("fragment_shader_path");
 
 	// Object 1
-	const Setting& cfg_object1 = cfg.lookup("object1");
-	glm::vec3 obj1_position((float)cfg_object1.lookup("position")[0], (float)cfg_object1.lookup("position")[1],
-							(float)cfg_object1.lookup("position")[2]);
-	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1],
-						 (float)cfg_object1.lookup("scale")[2]);
-	float obj1_zoom = cfg_object1.lookup("zoom");
+	const Setting& obj1_config = cfg.lookup("object1");
+	glm::vec3 obj1_position((float)obj1_config.lookup("position")[0], (float)obj1_config.lookup("position")[1],
+							(float)obj1_config.lookup("position")[2]);
+	glm::vec3 obj1_scale((float)obj1_config.lookup("scale")[0], (float)obj1_config.lookup("scale")[1],
+						 (float)obj1_config.lookup("scale")[2]);
+	float obj1_zoom = obj1_config.lookup("zoom");
 
 	// Object 2
-	const Setting& cfg_object2 = cfg.lookup("object2");
-	glm::vec3 obj2_position((float)cfg_object2.lookup("position")[0], (float)cfg_object2.lookup("position")[1],
-							(float)cfg_object2.lookup("position")[2]);
-	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1],
-						 (float)cfg_object2.lookup("scale")[2]);
-	float obj2_zoom = cfg_object2.lookup("zoom");
+	const Setting& obj2_config = cfg.lookup("object2");
+	glm::vec3 obj2_position((float)obj2_config.lookup("position")[0], (float)obj2_config.lookup("position")[1],
+							(float)obj2_config.lookup("position")[2]);
+	glm::vec3 obj2_scale((float)obj2_config.lookup("scale")[0], (float)obj2_config.lookup("scale")[1],
+						 (float)obj2_config.lookup("scale")[2]);
+	float obj2_zoom = obj2_config.lookup("zoom");
 
 	// Object 3
-	const Setting& cfg_object3 = cfg.lookup("object3");
-	glm::vec3 obj3_position((float)cfg_object3.lookup("position")[0], (float)cfg_object3.lookup("position")[1],
-							(float)cfg_object3.lookup("position")[2]);
-	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1],
-						 (float)cfg_object3.lookup("scale")[2]);
-	float obj3_zoom = cfg_object3.lookup("zoom");
+	const Setting& obj3_config = cfg.lookup("object3");
+	glm::vec3 obj3_position((float)obj3_config.lookup("position")[0], (float)obj3_config.lookup("position")[1],
+							(float)obj3_config.lookup("position")[2]);
+	glm::vec3 obj3_scale((float)obj3_config.lookup("scale")[0], (float)obj3_config.lookup("scale")[1],
+						 (float)obj3_config.lookup("scale")[2]);
+	float obj3_zoom = obj3_config.lookup("zoom");
 
 	// Object 4
-	const Setting& cfg_object4 = cfg.lookup("object4");
-	glm::vec3 obj4_position((float)cfg_object4.lookup("position")[0], (float)cfg_object4.lookup("position")[1],
-							(float)cfg_object4.lookup("position")[2]);
-	glm::vec3 obj4_scale((float)cfg_object4.lookup("scale")[0], (float)cfg_object4.lookup("scale")[1],
-						 (float)cfg_object4.lookup("scale")[2]);
-	float obj4_zoom = cfg_object4.lookup("zoom");
+	const Setting& obj4_config = cfg.lookup("object4");
+	glm::vec3 obj4_position((float)obj4_config.lookup("position")[0], (float)obj4_config.lookup("position")[1],
+							(float)obj4_config.lookup("position")[2]);
+	glm::vec3 obj4_scale((float)obj4_config.lookup("scale")[0], (float)obj4_config.lookup("scale")[1],
+						 (float)obj4_config.lookup("scale")[2]);
+	float obj4_zoom = obj4_config.lookup("zoom");
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -594,10 +594,10 @@ int main() {
 	glUseProgram(shader.ID);
 
 	// Carregar a texturas.
-	GLuint object1_texID = load_texture(cfg_object1.lookup("texture_path"));
-	GLuint object2_texID = load_texture(cfg_object2.lookup("texture_path"));
-	GLuint object3_texID = load_texture(cfg_object3.lookup("texture_path"));
-	GLuint object4_texID = load_texture(cfg_object4.lookup("texture_path"));
+	GLuint obj1_texID = load_texture(obj1_config.lookup("texture_path"));
+	GLuint obj2_texID = load_texture(obj2_config.lookup("texture_path"));
+	GLuint obj3_texID = load_texture(obj3_config.lookup("texture_path"));
+	GLuint obj4_texID = load_texture(obj4_config.lookup("texture_path"));
 
 	// Câmera.
 	camera.initialize((float)current_width, (float)current_height);
@@ -617,23 +617,23 @@ int main() {
 
 	// Carregar a geometria armazenada.
 	int nVertsObj1, nVertsObj2, nVertsObj3, nVertsObj4;
-	GLuint VAO1 = load_simple_obj(cfg_object1.lookup("obj_path"), nVertsObj1, glm::vec3(1.0, 0.0, 0.0));
-	GLuint VAO2 = load_simple_obj(cfg_object2.lookup("obj_path"), nVertsObj2, glm::vec3(0.0, 1.0, 0.0));
-	GLuint VAO3 = load_simple_obj(cfg_object3.lookup("obj_path"), nVertsObj3, glm::vec3(1.0, 1.0, 0.0));
-	GLuint VAO4 = load_simple_obj(cfg_object4.lookup("obj_path"), nVertsObj4, glm::vec3(1.0, 1.0, 0.0));
+	GLuint VAO1 = load_simple_obj(obj1_config.lookup("obj_path"), nVertsObj1, glm::vec3(1.0, 0.0, 0.0));
+	GLuint VAO2 = load_simple_obj(obj2_config.lookup("obj_path"), nVertsObj2, glm::vec3(0.0, 1.0, 0.0));
+	GLuint VAO3 = load_simple_obj(obj3_config.lookup("obj_path"), nVertsObj3, glm::vec3(1.0, 1.0, 0.0));
+	GLuint VAO4 = load_simple_obj(obj4_config.lookup("obj_path"), nVertsObj4, glm::vec3(1.0, 1.0, 0.0));
 
 	// Definir a malha dos objetos.
-	Mesh object1, object2, object3, object4;
-	object1.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, cfg_object1.lookup("rotation"));
-	object2.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, cfg_object2.lookup("rotation"));
-	object3.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, cfg_object3.lookup("rotation"));
-	object4.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, cfg_object4.lookup("rotation"));
+	Mesh obj1_mesh, obj2_mesh, obj3_mesh, obj4_mesh;
+	obj1_mesh.initialize(VAO1, nVertsObj1, &shader, obj1_position, obj1_scale, obj1_config.lookup("rotation"));
+	obj2_mesh.initialize(VAO2, nVertsObj2, &shader, obj2_position, obj2_scale, obj2_config.lookup("rotation"));
+	obj3_mesh.initialize(VAO3, nVertsObj3, &shader, obj3_position, obj3_scale, obj3_config.lookup("rotation"));
+	obj4_mesh.initialize(VAO4, nVertsObj4, &shader, obj4_position, obj4_scale, obj4_config.lookup("rotation"));
 
 	// Definiar material dos objetos
-	Material obj1_material = parseMTL(getMTLFilePath(cfg_object1.lookup("obj_path")));
-	Material obj2_material = parseMTL(getMTLFilePath(cfg_object2.lookup("obj_path")));
-	Material obj3_material = parseMTL(getMTLFilePath(cfg_object3.lookup("obj_path")));
-	Material obj4_material = parseMTL(getMTLFilePath(cfg_object4.lookup("obj_path")));
+	Material obj1_material = parseMTL(getMTLFilePath(obj1_config.lookup("obj_path")));
+	Material obj2_material = parseMTL(getMTLFilePath(obj2_config.lookup("obj_path")));
+	Material obj3_material = parseMTL(getMTLFilePath(obj3_config.lookup("obj_path")));
+	Material obj4_material = parseMTL(getMTLFilePath(obj4_config.lookup("obj_path")));
 
 	// Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
@@ -645,15 +645,15 @@ int main() {
 
 	// Declaração das matrizes de cada objeto.
 	// Para que não percam a posição do último movimento quando não estiverem selecionados para movimentação.
-	glm::mat4 model_object1 = glm::mat4(1);
-	glm::mat4 model_object2 = glm::mat4(1);
-	glm::mat4 model_object3 = glm::mat4(1);
-	glm::mat4 model_object4 = glm::mat4(1);
+	glm::mat4 obj1_model = glm::mat4(1);
+	glm::mat4 obj2_model = glm::mat4(1);
+	glm::mat4 obj3_model = glm::mat4(1);
+	glm::mat4 obj4_model = glm::mat4(1);
 
-	glm::mat4 projection_object1 = camera.getCameraProjection();
-	glm::mat4 projection_object2 = camera.getCameraProjection();
-	glm::mat4 projection_object3 = camera.getCameraProjection();
-	glm::mat4 projection_object4 = camera.getCameraProjection();
+	glm::mat4 obj1_projection = camera.getCameraProjection();
+	glm::mat4 obj2_projection = camera.getCameraProjection();
+	glm::mat4 obj3_projection = camera.getCameraProjection();
+	glm::mat4 obj4_projection = camera.getCameraProjection();
 
 	// glm::mat4 projection =
 	// Laço principal da execução.
@@ -680,14 +680,14 @@ int main() {
 
 		// ### Renderização do Objeto 1 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(1, model_object1, projection_object1, obj1_zoom);
-		shader.setMat4("model", glm::value_ptr(model_object1));
-		shader.setMat4("projection", glm::value_ptr(projection_object1));
+		update_object_matrix_to_move(1, obj1_model, obj1_projection, obj1_zoom);
+		shader.setMat4("model", glm::value_ptr(obj1_model));
+		shader.setMat4("projection", glm::value_ptr(obj1_projection));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object1_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object1_texID);
+		glBindTexture(GL_TEXTURE_2D, obj1_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj1_texID);
 
 		// Setando valores de iluminação para o shader.
 		setMaterialProperties(shader, obj1_material);
@@ -696,22 +696,22 @@ int main() {
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall.
-		object1.update(model_object1);
-		object1.draw();
+		obj1_mesh.update(obj1_model);
+		obj1_mesh.draw();
 
 		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// ### Renderização do Objeto 2 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(2, model_object2, projection_object2, obj2_zoom);
-		shader.setMat4("model", glm::value_ptr(model_object2));
-		shader.setMat4("projection", glm::value_ptr(projection_object2));
+		update_object_matrix_to_move(2, obj2_model, obj2_projection, obj2_zoom);
+		shader.setMat4("model", glm::value_ptr(obj2_model));
+		shader.setMat4("projection", glm::value_ptr(obj2_projection));
 
 		// Definição do material da superficie (textura).
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object2_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object2_texID);
+		glBindTexture(GL_TEXTURE_2D, obj2_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj2_texID);
 
 		// Setando valores de iluminação para o shader.
 		setMaterialProperties(shader, obj2_material);
@@ -720,22 +720,22 @@ int main() {
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho. - drawcall.
-		object2.update(model_object2);
-		object2.draw();
+		obj2_mesh.update(obj2_model);
+		obj2_mesh.draw();
 
 		// Desvincular a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// ### Renderização do Objeto 3 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(3, model_object3, projection_object3, obj3_zoom);
-		shader.setMat4("model", glm::value_ptr(model_object3));
-		shader.setMat4("projection", glm::value_ptr(projection_object3));
+		update_object_matrix_to_move(3, obj3_model, obj3_projection, obj3_zoom);
+		shader.setMat4("model", glm::value_ptr(obj3_model));
+		shader.setMat4("projection", glm::value_ptr(obj3_projection));
 
 		// Definição do material da superfície (textura).
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object3_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object3_texID);
+		glBindTexture(GL_TEXTURE_2D, obj3_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj3_texID);
 
 		// Setando os valores de iluminação para o shader.
 		setMaterialProperties(shader, obj3_material);
@@ -744,21 +744,21 @@ int main() {
 		shader.setInt("tex_buffer", 0);
 
 		// Chamada de desenho - drawcall.
-		object3.update(model_object3);
-		object3.draw();
+		obj3_mesh.update(obj3_model);
+		obj3_mesh.draw();
 
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// ### Renderização do Objeto 4 ###
 		// Definição do material da superfície (textura).
-		update_object_matrix_to_move(4, model_object4, projection_object4, obj4_zoom);
-		shader.setMat4("model", glm::value_ptr(model_object4));
-		shader.setMat4("projection", glm::value_ptr(projection_object4));
+		update_object_matrix_to_move(4, obj4_model, obj4_projection, obj4_zoom);
+		shader.setMat4("model", glm::value_ptr(obj4_model));
+		shader.setMat4("projection", glm::value_ptr(obj4_projection));
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, object4_texID);
-		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object4_texID);
+		glBindTexture(GL_TEXTURE_2D, obj4_texID);
+		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), obj4_texID);
 
 		// Setando os valores de iluminação para o shader.
 		setMaterialProperties(shader, obj4_material);
@@ -789,10 +789,10 @@ int main() {
 		memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)),
 			   sizeof(float) * 16);
 		shader.setMat4("model", modelArray);
-		shader.setMat4("projection", glm::value_ptr(projection_object4));
+		shader.setMat4("projection", glm::value_ptr(obj4_projection));
 
 		// Chamada de desenho - drawcall.
-		object4.draw();
+		obj4_mesh.draw();
 
 		// Desvincunlar a textura.
 		glBindTexture(GL_TEXTURE_2D, 0);
