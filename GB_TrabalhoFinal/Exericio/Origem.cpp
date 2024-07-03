@@ -45,7 +45,6 @@ float fov = 1.0f;
 
 // Variáveis para movimentação dos objetos.
 int selected_object_id = 0;
-float zoom_object1 = 0, zoom_object2 = 0, zoom_object3 = 0;
 
 const int CAMERA_ID = 0;
 
@@ -64,12 +63,7 @@ enum RotationState {
 RotationState currentRotationState = ROTATE_NONE;
 
 // Função para resetar os valores de movimentação utilizados para os objetos.
-void reset_moviment_values() {
-	zoom_object1 = 0;
-	zoom_object2 = 0;
-	zoom_object3 = 0;
-	currentRotationState = ROTATE_NONE;
-}
+void reset_moviment_values() { currentRotationState = ROTATE_NONE; }
 
 // Função para ler um arquivo de configuração.
 void read_config(Config& cfg, const string& filename) {
@@ -522,6 +516,7 @@ int main() {
 							(float)cfg_object1.lookup("position")[2]);
 	glm::vec3 obj1_scale((float)cfg_object1.lookup("scale")[0], (float)cfg_object1.lookup("scale")[1],
 						 (float)cfg_object1.lookup("scale")[2]);
+	float obj1_zoom = cfg_object1.lookup("zoom");
 
 	// Object 2
 	const Setting& cfg_object2 = cfg.lookup("object2");
@@ -529,6 +524,7 @@ int main() {
 							(float)cfg_object2.lookup("position")[2]);
 	glm::vec3 obj2_scale((float)cfg_object2.lookup("scale")[0], (float)cfg_object2.lookup("scale")[1],
 						 (float)cfg_object2.lookup("scale")[2]);
+	float obj2_zoom = cfg_object2.lookup("zoom");
 
 	// Object 3
 	const Setting& cfg_object3 = cfg.lookup("object3");
@@ -536,6 +532,7 @@ int main() {
 							(float)cfg_object3.lookup("position")[2]);
 	glm::vec3 obj3_scale((float)cfg_object3.lookup("scale")[0], (float)cfg_object3.lookup("scale")[1],
 						 (float)cfg_object3.lookup("scale")[2]);
+	float obj3_zoom = cfg_object3.lookup("zoom");
 
 	// Object 4
 	const Setting& cfg_object4 = cfg.lookup("object4");
@@ -543,6 +540,7 @@ int main() {
 							(float)cfg_object4.lookup("position")[2]);
 	glm::vec3 obj4_scale((float)cfg_object4.lookup("scale")[0], (float)cfg_object4.lookup("scale")[1],
 						 (float)cfg_object4.lookup("scale")[2]);
+	float obj4_zoom = cfg_object4.lookup("zoom");
 
 	// Inicializar GLFW.
 	glfwInit();
@@ -654,6 +652,7 @@ int main() {
 	glm::mat4 model_object1 = glm::mat4(1);
 	glm::mat4 model_object2 = glm::mat4(1);
 	glm::mat4 model_object3 = glm::mat4(1);
+	glm::mat4 model_object4 = glm::mat4(1);
 
 	glm::mat4 projection_object1 = camera.getCameraProjection();
 	glm::mat4 projection_object2 = camera.getCameraProjection();
@@ -685,7 +684,7 @@ int main() {
 
 		// ### Renderização do Objeto 1 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(1, model_object1, projection_object1, zoom_object1);
+		update_object_matrix_to_move(1, model_object1, projection_object1, obj1_zoom);
 		shader.setMat4("model", glm::value_ptr(model_object1));
 		shader.setMat4("projection", glm::value_ptr(projection_object1));
 
@@ -709,7 +708,7 @@ int main() {
 
 		// ### Renderização do Objeto 2 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(2, model_object2, projection_object2, zoom_object2);
+		update_object_matrix_to_move(2, model_object2, projection_object2, obj2_zoom);
 		shader.setMat4("model", glm::value_ptr(model_object2));
 		shader.setMat4("projection", glm::value_ptr(projection_object2));
 
@@ -733,7 +732,7 @@ int main() {
 
 		// ### Renderização do Objeto 3 ###
 		// Atualização das matrizes de modelo e projeção.
-		update_object_matrix_to_move(3, model_object3, projection_object3, zoom_object3);
+		update_object_matrix_to_move(3, model_object3, projection_object3, obj3_zoom);
 		shader.setMat4("model", glm::value_ptr(model_object3));
 		shader.setMat4("projection", glm::value_ptr(projection_object3));
 
@@ -757,6 +756,10 @@ int main() {
 
 		// ### Renderização do Objeto 4 ###
 		// Definição do material da superfície (textura).
+		update_object_matrix_to_move(4, model_object4, projection_object4, obj4_zoom);
+		shader.setMat4("model", glm::value_ptr(model_object4));
+		shader.setMat4("projection", glm::value_ptr(projection_object4));
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, object4_texID);
 		glUniform1i(glGetUniformLocation(shader.ID, "diffuseMap"), object4_texID);
