@@ -12,8 +12,8 @@ view_y = (0.0, 0.0, 0.0)
 view_z = (0.0, 1.0, 0.0)
 
 # Luz
-light_pos = (-2.0, 10.0, 2.0)
-light_color = (1.0, 1.0, 0.0, 0.0)
+light_pos = (20.0, 10.0, 2.0)
+light_color = (0.5, 0.5, 0.5, 0.0)
 
 # Shader
 vertex_shader_path = "../shaders_archives/Shader.vs"
