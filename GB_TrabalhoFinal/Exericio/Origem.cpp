@@ -476,15 +476,14 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 
 	// Apply zoom to the projection matrix
 	if (currentRotationState == ZOOM_IN || currentRotationState == ZOOM_OUT) {
-		projection = glm::perspective(glm::radians(45.0f + zoom), window_width / window_height, 1.0f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f + zoom), window_width / window_height, 0.1f, 100.0f);
 	}
 	// Reset the rotation state after applying the transformation
 	currentRotationState = ROTATE_NONE;
 }
 
 // Função para renderizar o objeto.
-void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::mat4& projection, float& zoom,
-						  GLuint texture_id, Material material, int window_width, int window_height) {
+void handle_object_render(Shader& shader, Mesh object, glm::mat4& model, glm::mat4& projection, float& zoom, GLuint texture_id, Material material, int window_width, int window_height) {
 	// Atualização das matrizes de modelo e projeção.
 	update_object_matrix_to_move(object.getId(), model, projection, zoom, (float)window_width, (float)window_height);
 	shader.setMat4("model", glm::value_ptr(model));
@@ -521,17 +520,12 @@ int main() {
 
 	// Camera
 	fov = cfg.lookup("fov");
-	glm::vec3 camera_position((float)cfg.lookup("position")[0], (float)cfg.lookup("position")[1],
-							  (float)cfg.lookup("position")[2]);
-	glm::vec3 camera_orientation((float)cfg.lookup("orientation")[0], (float)cfg.lookup("orientation")[1],
-								 (float)cfg.lookup("orientation")[2]);
+	glm::vec3 camera_position((float)cfg.lookup("position")[0], (float)cfg.lookup("position")[1], (float)cfg.lookup("position")[2]);
+	glm::vec3 camera_orientation((float)cfg.lookup("orientation")[0], (float)cfg.lookup("orientation")[1], (float)cfg.lookup("orientation")[2]);
 
-	glm::vec3 camera_view_x((float)cfg.lookup("view_x")[0], (float)cfg.lookup("view_x")[1],
-							(float)cfg.lookup("view_x")[2]);
-	glm::vec3 camera_view_y((float)cfg.lookup("view_y")[0], (float)cfg.lookup("view_y")[1],
-							(float)cfg.lookup("view_y")[2]);
-	glm::vec3 camera_view_z((float)cfg.lookup("view_z")[0], (float)cfg.lookup("view_z")[1],
-							(float)cfg.lookup("view_z")[2]);
+	glm::vec3 camera_view_x((float)cfg.lookup("view_x")[0], (float)cfg.lookup("view_x")[1], (float)cfg.lookup("view_x")[2]);
+	glm::vec3 camera_view_y((float)cfg.lookup("view_y")[0], (float)cfg.lookup("view_y")[1], (float)cfg.lookup("view_y")[2]);
+	glm::vec3 camera_view_z((float)cfg.lookup("view_z")[0], (float)cfg.lookup("view_z")[1], (float)cfg.lookup("view_z")[2]);
 
 	// Shaders
 	const char* vertex_shader_path = cfg.lookup("vertex_shader_path");
@@ -539,34 +533,26 @@ int main() {
 
 	// Object 1
 	const Setting& obj1_config = cfg.lookup("object1");
-	glm::vec3 obj1_position((float)obj1_config.lookup("position")[0], (float)obj1_config.lookup("position")[1],
-							(float)obj1_config.lookup("position")[2]);
-	glm::vec3 obj1_scale((float)obj1_config.lookup("scale")[0], (float)obj1_config.lookup("scale")[1],
-						 (float)obj1_config.lookup("scale")[2]);
+	glm::vec3 obj1_position((float)obj1_config.lookup("position")[0], (float)obj1_config.lookup("position")[1], (float)obj1_config.lookup("position")[2]);
+	glm::vec3 obj1_scale((float)obj1_config.lookup("scale")[0], (float)obj1_config.lookup("scale")[1], (float)obj1_config.lookup("scale")[2]);
 	float obj1_zoom = obj1_config.lookup("zoom");
 
 	// Object 2
 	const Setting& obj2_config = cfg.lookup("object2");
-	glm::vec3 obj2_position((float)obj2_config.lookup("position")[0], (float)obj2_config.lookup("position")[1],
-							(float)obj2_config.lookup("position")[2]);
-	glm::vec3 obj2_scale((float)obj2_config.lookup("scale")[0], (float)obj2_config.lookup("scale")[1],
-						 (float)obj2_config.lookup("scale")[2]);
+	glm::vec3 obj2_position((float)obj2_config.lookup("position")[0], (float)obj2_config.lookup("position")[1], (float)obj2_config.lookup("position")[2]);
+	glm::vec3 obj2_scale((float)obj2_config.lookup("scale")[0], (float)obj2_config.lookup("scale")[1], (float)obj2_config.lookup("scale")[2]);
 	float obj2_zoom = obj2_config.lookup("zoom");
 
 	// Object 3
 	const Setting& obj3_config = cfg.lookup("object3");
-	glm::vec3 obj3_position((float)obj3_config.lookup("position")[0], (float)obj3_config.lookup("position")[1],
-							(float)obj3_config.lookup("position")[2]);
-	glm::vec3 obj3_scale((float)obj3_config.lookup("scale")[0], (float)obj3_config.lookup("scale")[1],
-						 (float)obj3_config.lookup("scale")[2]);
+	glm::vec3 obj3_position((float)obj3_config.lookup("position")[0], (float)obj3_config.lookup("position")[1], (float)obj3_config.lookup("position")[2]);
+	glm::vec3 obj3_scale((float)obj3_config.lookup("scale")[0], (float)obj3_config.lookup("scale")[1], (float)obj3_config.lookup("scale")[2]);
 	float obj3_zoom = obj3_config.lookup("zoom");
 
 	// Object 4
 	const Setting& obj4_config = cfg.lookup("object4");
-	glm::vec3 obj4_position((float)obj4_config.lookup("position")[0], (float)obj4_config.lookup("position")[1],
-							(float)obj4_config.lookup("position")[2]);
-	glm::vec3 obj4_scale((float)obj4_config.lookup("scale")[0], (float)obj4_config.lookup("scale")[1],
-						 (float)obj4_config.lookup("scale")[2]);
+	glm::vec3 obj4_position((float)obj4_config.lookup("position")[0], (float)obj4_config.lookup("position")[1], (float)obj4_config.lookup("position")[2]);
+	glm::vec3 obj4_scale((float)obj4_config.lookup("scale")[0], (float)obj4_config.lookup("scale")[1], (float)obj4_config.lookup("scale")[2]);
 	float obj4_zoom = obj4_config.lookup("zoom");
 
 	// Inicializar GLFW.
@@ -668,8 +654,7 @@ int main() {
 
 	// Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", cfg.lookup("light_pos")[0], cfg.lookup("light_pos")[1], cfg.lookup("light_pos")[2]);
-	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1],
-				   cfg.lookup("light_color")[2]);
+	shader.setVec3("lightColor", cfg.lookup("light_color")[0], cfg.lookup("light_color")[1], cfg.lookup("light_color")[2]);
 
 	float planetRotationAngle = 0.0f;
 	glm::vec3 planetTranslation(0.0f, 0.0f, 0.0f);
@@ -709,16 +694,13 @@ int main() {
 		shader.setVec3("cameraPos", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		// Renderização do Objeto 1.
-		handle_object_render(shader, obj1_mesh, obj1_model, obj1_projection, obj1_zoom, obj1_texID, obj1_material,
-							 window_width, window_height);
+		handle_object_render(shader, obj1_mesh, obj1_model, obj1_projection, obj1_zoom, obj1_texID, obj1_material, window_width, window_height);
 
 		// Renderização do Objeto 2.
-		handle_object_render(shader, obj2_mesh, obj2_model, obj2_projection, obj2_zoom, obj2_texID, obj2_material,
-							 window_width, window_height);
+		handle_object_render(shader, obj2_mesh, obj2_model, obj2_projection, obj2_zoom, obj2_texID, obj2_material, window_width, window_height);
 
 		// Renderização do Objeto 3.
-		handle_object_render(shader, obj3_mesh, obj3_model, obj3_projection, obj3_zoom, obj3_texID, obj3_material,
-							 window_width, window_height);
+		handle_object_render(shader, obj3_mesh, obj3_model, obj3_projection, obj3_zoom, obj3_texID, obj3_material, window_width, window_height);
 
 		// Renderização do Objeto 4.
 		// Definição do material da superfície (textura).
@@ -749,15 +731,13 @@ int main() {
 		planetTranslation.y = 3.0f;
 
 		// Criando matrizes de Rotação e Transalação.
-		glm::mat4 rotation =
-			glm::rotate(glm::mat4(1.0f), glm::radians(planetRotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(planetRotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 translation = glm::translate(glm::mat4(1.0f), planetTranslation);
 
 		// Aplicando a transformação a partir da translação e rotação.
 		glm::mat4 planetTransform = translation * rotation;
 		float modelArray[16];
-		memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)),
-			   sizeof(float) * 16);
+		memcpy(modelArray, glm::value_ptr(planetTransform * glm::scale(glm::mat4(1.0f), obj4_scale)), sizeof(float) * 16);
 		shader.setMat4("model", modelArray);
 		shader.setMat4("projection", glm::value_ptr(obj4_projection));
 
