@@ -12,7 +12,7 @@
 // GLFW.
 #include <GLFW/glfw3.h>
 
-// GLM.
+// GLM
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -428,7 +428,7 @@ void setMaterialProperties(Shader& shader, const Material& material, bool select
 	shader.setVec3("kd", material.Kd.r, material.Kd.g, material.Kd.b);
 	shader.setVec3("ks", material.Ks.r, material.Ks.g, material.Ks.b);
 	if (selected) {
-		shader.setVec3("ke", 0.2, 0.7, 0.0);
+		shader.setVec3("ke", 0.2, 0.1, 0.0);
 	} else {
 		shader.setVec3("ke", material.Ke.r, material.Ke.g, material.Ke.b);
 	}
@@ -476,8 +476,9 @@ void update_object_matrix_to_move(int object_id, glm::mat4& model, glm::mat4& pr
 
 	// Apply zoom to the projection matrix
 	if (currentRotationState == ZOOM_IN || currentRotationState == ZOOM_OUT) {
-		projection = glm::perspective(glm::radians(45.0f + zoom), window_width / window_height, 1.0f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f + zoom), window_width / window_height, 0.1f, 100.0f);
 	}
+
 	// Reset the rotation state after applying the transformation
 	currentRotationState = ROTATE_NONE;
 }
@@ -631,7 +632,7 @@ int main() {
 	GLuint obj4_texID = load_texture(obj4_config.lookup("texture_path"));
 
 	// Câmera.
-	camera.initialize((float)current_width, (float)current_height);
+	camera.initialize((float)window_width, (float)window_height);
 	camera.setCameraPosition(camera_position);
 	camera.setCameraProjection(camera_view_x, camera_view_y, camera_view_z);
 
